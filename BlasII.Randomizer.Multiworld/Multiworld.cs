@@ -1,7 +1,10 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using BlasII.ModdingAPI;
+using BlasII.Randomizer.Models;
+using BlasII.Randomizer.Multiworld.Models;
 using BlasII.Randomizer.Multiworld.Receivers;
+using BlasII.Randomizer.Multiworld.Senders;
 using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine;
@@ -13,9 +16,19 @@ namespace BlasII.Randomizer.Multiworld;
 /// </summary>
 public class Multiworld : BlasIIMod
 {
-    internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION) { }
+    // Hopefully dont need this in the future
+    private readonly ServerConnection _connection = new();
 
-    private readonly ErrorReceiver _error = new ErrorReceiver();
+    private readonly LocationSender _locationSender;
+
+    private readonly ErrorReceiver _errorReceiver;
+
+    internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION)
+    {
+        _locationSender = new LocationSender(_connection);
+
+        _errorReceiver = new ErrorReceiver();
+    }
 
     /// <summary>
     /// Setup handlers on game start
@@ -26,6 +39,8 @@ public class Multiworld : BlasIIMod
         MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", (content) =>
         {
             ModLog.Warn("Multiworld will send out location id: " + content);
+            ItemLocation location = Main.Randomizer.ItemLocationStorage[content];
+            _locationSender.Send(location);
         });
     }
 
@@ -34,7 +49,8 @@ public class Multiworld : BlasIIMod
     /// </summary>
     protected override void OnSceneLoaded(string sceneName)
     {
-        Connect("localhost", "B", null);
+        if (!_connection.Connected)
+            Connect("localhost", "B", null);
     }
 
     /// <summary>
@@ -57,7 +73,8 @@ public class Multiworld : BlasIIMod
         try
         {
             session = ArchipelagoSessionFactory.CreateSession(server);
-            session.Socket.ErrorReceived += _error.Handle;
+            session.Socket.ErrorReceived += _errorReceiver.Handle;
+            _connection.UpdateSession(session);
 
             result = session.TryConnectAndLogin("Blasphemous 2", player, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, password, true);
         }
@@ -72,6 +89,7 @@ public class Multiworld : BlasIIMod
 
         bool connected = result.Successful;
         ModLog.Info("Connection result: " + connected);
+        _connection.InvokeConnect(result);
 
         // parse slot data
         LoginSuccessful success = result as LoginSuccessful;
