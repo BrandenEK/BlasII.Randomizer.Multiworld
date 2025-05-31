@@ -1,4 +1,8 @@
-﻿using BlasII.ModdingAPI;
+﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using BlasII.ModdingAPI;
+using System;
+using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld;
 
@@ -9,8 +13,52 @@ public class Multiworld : BlasIIMod
 {
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION) { }
 
+    /// <summary>
+    /// Setup handlers on game start
+    /// </summary>
     protected override void OnInitialize()
     {
-        // Perform initialization here
+        MessageHandler.AllowReceivingBroadcasts = true;
+        MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", (content) =>
+        {
+            ModLog.Warn("Multiworld will send out location id: " + content);
+        });
+    }
+
+    /// <summary>
+    /// Simulates connecting to AP
+    /// </summary>
+    protected override void OnSceneLoaded(string sceneName)
+    {
+        Connect("localhost", "B", null);
+    }
+
+    /// <summary>
+    /// Simulates recieving items on keypress
+    /// </summary>
+    protected override void OnUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            ModLog.Warn("Multiworld will receive item id: " + "TEST_ID");
+        }
+    }
+
+    private void Connect(string server, string player, string password)
+    {
+        LoginResult result;
+
+        try
+        {
+            ArchipelagoSession session = ArchipelagoSessionFactory.CreateSession(server);
+            result = session.TryConnectAndLogin("Blasphemous 2", player, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, password, true);
+        }
+        catch (Exception ex)
+        {
+            result = new LoginFailure(ex.ToString());
+        }
+
+        bool connected = result.Successful;
+        ModLog.Info("Connection result: " + connected);
     }
 }
