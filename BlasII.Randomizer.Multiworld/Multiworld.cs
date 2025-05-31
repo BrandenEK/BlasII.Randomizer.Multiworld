@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using BlasII.ModdingAPI;
+using BlasII.Randomizer.Multiworld.Receivers;
 using System;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ namespace BlasII.Randomizer.Multiworld;
 public class Multiworld : BlasIIMod
 {
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION) { }
+
+    private readonly ErrorReceiver _error = new ErrorReceiver();
 
     /// <summary>
     /// Setup handlers on game start
@@ -47,15 +50,21 @@ public class Multiworld : BlasIIMod
     private void Connect(string server, string player, string password)
     {
         LoginResult result;
+        ModLog.Info($"Attempting to connect to {server} as {player} with password '{password}'");
 
         try
         {
             ArchipelagoSession session = ArchipelagoSessionFactory.CreateSession(server);
+            session.Socket.ErrorReceived += _error.Handle;
+
             result = session.TryConnectAndLogin("Blasphemous 2", player, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, password, true);
         }
         catch (Exception ex)
         {
             result = new LoginFailure(ex.ToString());
+
+            // temp
+            ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
         }
 
         bool connected = result.Successful;
