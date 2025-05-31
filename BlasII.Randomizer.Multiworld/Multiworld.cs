@@ -2,6 +2,7 @@
 using Archipelago.MultiClient.Net.Enums;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Multiworld.Receivers;
+using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine;
 
@@ -49,12 +50,13 @@ public class Multiworld : BlasIIMod
 
     private void Connect(string server, string player, string password)
     {
+        ArchipelagoSession session;
         LoginResult result;
         ModLog.Info($"Attempting to connect to {server} as {player} with password '{password}'");
 
         try
         {
-            ArchipelagoSession session = ArchipelagoSessionFactory.CreateSession(server);
+            session = ArchipelagoSessionFactory.CreateSession(server);
             session.Socket.ErrorReceived += _error.Handle;
 
             result = session.TryConnectAndLogin("Blasphemous 2", player, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, password, true);
@@ -65,9 +67,22 @@ public class Multiworld : BlasIIMod
 
             // temp
             ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
+            return;
         }
 
         bool connected = result.Successful;
         ModLog.Info("Connection result: " + connected);
+
+        // parse slot data
+        LoginSuccessful success = result as LoginSuccessful;
+
+        // Load settings from slotdata
+        RandomizerSettings settings = ((JObject)success.SlotData["settings"]).ToObject<RandomizerSettings>();
+        settings.Seed = CalculateMultiworldSeed(session.RoomState.Seed, player);
+    }
+
+    private int CalculateMultiworldSeed(string seed, string name)
+    {
+        return Math.Abs(((seed.GetHashCode() / 2) + (name.GetHashCode() / 2)) % RandomizerSettings.MAX_SEED);
     }
 }
