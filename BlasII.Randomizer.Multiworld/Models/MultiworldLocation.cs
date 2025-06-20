@@ -1,15 +1,18 @@
 ﻿
 namespace BlasII.Randomizer.Multiworld.Models;
 
-public class MultiworldLocation
+/// <summary>
+/// Models a mapping between the internal and server ids
+/// </summary>
+public class MultiworldLocation(string i, long s)
 {
-    public string InternalId { get; }
+    /// <summary>
+    /// The in-game location id
+    /// </summary>
+    public string InternalId { get; } = i;
 
-    public long ServerId { get; }
-
-    public MultiworldLocation(string Internal, long ap)
-    {
-        InternalId = Internal;
-        ServerId = ap;
-    }
+    /// <summary>
+    /// The AP server location id
+    /// </summary>
+    public long ServerId { get; } = s;
 }
