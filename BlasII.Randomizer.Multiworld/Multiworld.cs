@@ -1,10 +1,12 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using BlasII.Framework.Menus;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
+using BlasII.Randomizer.Multiworld.Services;
 using Newtonsoft.Json.Linq;
 using System;
 
@@ -41,12 +43,22 @@ public class Multiworld : BlasIIMod
     }
 
     /// <summary>
+    /// Registers all required services
+    /// </summary>
+    protected override void OnRegisterServices(ModServiceProvider provider)
+    {
+        var menu = new MultiworldMenu();
+        provider.RegisterNewGameMenu(menu);
+        provider.RegisterLoadGameMenu(menu);
+    }
+
+    /// <summary>
     /// Simulates connecting to AP
     /// </summary>
     protected override void OnSceneLoaded(string sceneName)
     {
-        if (!_connection.Connected)
-            Connect("localhost", "B", null);
+        //if (!_connection.Connected)
+        //    Connect("localhost", "B", null);
     }
 
     /// <summary>
