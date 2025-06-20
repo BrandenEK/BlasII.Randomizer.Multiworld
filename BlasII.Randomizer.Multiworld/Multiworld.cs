@@ -37,12 +37,7 @@ public class Multiworld : BlasIIMod
     protected override void OnInitialize()
     {
         MessageHandler.AllowReceivingBroadcasts = true;
-        MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", (content) =>
-        {
-            ModLog.Warn("Multiworld will send out location id: " + content);
-            ItemLocation location = Main.Randomizer.ItemLocationStorage[content];
-            _locationSender.Send(location);
-        });
+        MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", OnCheckLocation);
     }
 
     /// <summary>
@@ -60,6 +55,13 @@ public class Multiworld : BlasIIMod
     protected override void OnUpdate()
     {
         _itemReceiver.OnUpdate();
+    }
+
+    private void OnCheckLocation(string locationId)
+    {
+        ModLog.Warn($"Sending location {locationId}");
+        ItemLocation location = Main.Randomizer.ItemLocationStorage[locationId];
+        _locationSender.Send(location);
     }
 
     private void Connect(string server, string player, string password)
