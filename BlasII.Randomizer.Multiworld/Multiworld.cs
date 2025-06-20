@@ -7,7 +7,6 @@ using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
 using Newtonsoft.Json.Linq;
 using System;
-using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld;
 
@@ -22,12 +21,14 @@ public class Multiworld : BlasIIMod
     private readonly LocationSender _locationSender;
 
     private readonly ErrorReceiver _errorReceiver;
+    private readonly ItemReceiver _itemReceiver;
 
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION)
     {
         _locationSender = new LocationSender(_connection);
 
         _errorReceiver = new ErrorReceiver();
+        _itemReceiver = new ItemReceiver();
     }
 
     /// <summary>
@@ -58,10 +59,7 @@ public class Multiworld : BlasIIMod
     /// </summary>
     protected override void OnUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            ModLog.Warn("Multiworld will receive item id: " + "TEST_ID");
-        }
+        _itemReceiver.OnUpdate();
     }
 
     private void Connect(string server, string player, string password)
@@ -73,7 +71,8 @@ public class Multiworld : BlasIIMod
         try
         {
             session = ArchipelagoSessionFactory.CreateSession(server);
-            session.Socket.ErrorReceived += _errorReceiver.Handle;
+            session.Socket.ErrorReceived += _errorReceiver.OnReceiveError;
+            session.Items.ItemReceived += _itemReceiver.OnReceiveItem;
             _connection.UpdateSession(session);
 
             result = session.TryConnectAndLogin("Blasphemous 2", player, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, password, true);
