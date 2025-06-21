@@ -1,5 +1,6 @@
 ﻿using BlasII.Framework.Menus;
 using BlasII.Framework.Menus.Options;
+using BlasII.ModdingAPI;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Services;
@@ -30,6 +31,26 @@ public class MultiworldMenu : ModMenu
         _setServer = text.CreateOption("server", ui, new Vector2(0, 150), "option/server", false, true, 64);
         _setServer = text.CreateOption("name", ui, new Vector2(0, 0), "option/name", false, true, 64);
         _setServer = text.CreateOption("password", ui, new Vector2(0, -150), "option/password", false, true, 64);
+    }
+
+    /// <summary>
+    /// Restore client settings to menu
+    /// </summary>
+    public override void OnStart()
+    {
+        // Get save file values from somewhere
+
+        _setServer.CurrentValue = string.Empty;
+        _setName.CurrentValue = string.Empty;
+        _setPassword.CurrentValue = string.Empty;
+    }
+
+    /// <summary>
+    /// Store client settings from menu
+    /// </summary>
+    public override void OnFinish()
+    {
+        base.OnFinish();
     }
 
     private TextOption _setServer;
