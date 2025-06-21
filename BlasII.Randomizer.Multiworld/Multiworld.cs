@@ -38,6 +38,7 @@ public class Multiworld : BlasIIMod
     /// </summary>
     protected override void OnInitialize()
     {
+        LocalizationHandler.RegisterDefaultLanguage("en");
         MessageHandler.AllowReceivingBroadcasts = true;
         MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", OnCheckLocation);
     }
