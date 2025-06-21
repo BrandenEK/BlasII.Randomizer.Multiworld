@@ -20,4 +20,14 @@ public class ConnectionInfo
     /// The optional password for the room
     /// </summary>
     public string Password { get; set; }
+
+    /// <summary>
+    /// Formats the connection info
+    /// </summary>
+    public override string ToString()
+    {
+        return $"Connection details to {Server} as {Name}" + (!string.IsNullOrEmpty(Password)
+            ? $" [{Password}]"
+            : string.Empty);
+    }
 }

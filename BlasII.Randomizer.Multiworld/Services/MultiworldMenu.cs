@@ -1,6 +1,7 @@
 ﻿using BlasII.Framework.Menus;
 using BlasII.Framework.Menus.Options;
 using BlasII.ModdingAPI;
+using BlasII.Randomizer.Multiworld.Models;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Services;
@@ -38,11 +39,12 @@ public class MultiworldMenu : ModMenu
     /// </summary>
     public override void OnStart()
     {
-        // Get save file values from somewhere
+        ConnectionInfo info = Main.Multiworld.CurrentConnection;
+        ModLog.Info($"Starting menu with {info?.ToString() ?? "nothing"}");
 
-        _setServer.CurrentValue = string.Empty;
-        _setName.CurrentValue = string.Empty;
-        _setPassword.CurrentValue = string.Empty;
+        _setServer.CurrentValue = info?.Server ?? string.Empty;
+        _setName.CurrentValue = info?.Name ?? string.Empty;
+        _setPassword.CurrentValue = info?.Password ?? string.Empty;
     }
 
     /// <summary>
@@ -50,7 +52,19 @@ public class MultiworldMenu : ModMenu
     /// </summary>
     public override void OnFinish()
     {
-        base.OnFinish();
+        // Validate connected first
+
+        var info = new ConnectionInfo()
+        {
+            Server = _setServer.CurrentValue,
+            Name = _setName.CurrentValue,
+            Password = _setPassword.CurrentValue,
+        };
+
+        ModLog.Info($"Finishing menu with {info}");
+        Main.Multiworld.CurrentConnection = info;
+
+        Multiworld.IGNORE_DATA_CLEAR = true;
     }
 
     private TextOption _setServer;

@@ -29,7 +29,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     /// <summary>
     /// The current connection details
     /// </summary>
-    public ConnectionInfo CurrentConnection { get; private set; } = null;
+    public ConnectionInfo CurrentConnection { get; set; } = null;
 
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION)
     {
@@ -66,6 +66,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     {
         //if (!_connection.Connected)
         //    Connect("localhost", "B", null);
+        IGNORE_DATA_CLEAR = false;
     }
 
     /// <summary>
@@ -99,6 +100,10 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     /// </summary>
     public void LoadSlot(MultiworldSlotData data)
     {
+        // It resets/loads data after finishing a menu, so skip until the next scene load
+        if (IGNORE_DATA_CLEAR)
+            return;
+
         CurrentConnection = data.connection;
     }
 
@@ -107,6 +112,10 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     /// </summary>
     public void ResetSlot()
     {
+        // It resets/loads data after finishing a menu, so skip until the next scene load
+        if (IGNORE_DATA_CLEAR)
+            return;
+
         CurrentConnection = null;
     }
 
@@ -150,4 +159,6 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     {
         return Math.Abs(((seed.GetHashCode() / 2) + (name.GetHashCode() / 2)) % RandomizerSettings.MAX_SEED);
     }
+
+    internal static bool IGNORE_DATA_CLEAR = false;
 }
