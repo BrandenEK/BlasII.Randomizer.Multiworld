@@ -1,0 +1,6 @@
+lang: en
+
+# Settings menu
+option/server: Server IP:
+option/name: Player name:
+option/password: Password:

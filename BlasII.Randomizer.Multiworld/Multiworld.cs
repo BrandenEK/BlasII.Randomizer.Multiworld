@@ -1,10 +1,13 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
+using BlasII.Framework.Menus;
 using BlasII.ModdingAPI;
+using BlasII.ModdingAPI.Persistence;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
+using BlasII.Randomizer.Multiworld.Services;
 using Newtonsoft.Json.Linq;
 using System;
 
@@ -13,7 +16,7 @@ namespace BlasII.Randomizer.Multiworld;
 /// <summary>
 /// A multiworld client that allows the Randomizer to connect to AP
 /// </summary>
-public class Multiworld : BlasIIMod
+public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 {
     // Hopefully dont need this in the future
     private readonly ServerConnection _connection = new();
@@ -22,6 +25,11 @@ public class Multiworld : BlasIIMod
 
     private readonly ErrorReceiver _errorReceiver;
     private readonly ItemReceiver _itemReceiver;
+
+    /// <summary>
+    /// The current connection details
+    /// </summary>
+    public ConnectionInfo CurrentConnection { get; set; } = null;
 
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION)
     {
@@ -36,8 +44,19 @@ public class Multiworld : BlasIIMod
     /// </summary>
     protected override void OnInitialize()
     {
+        LocalizationHandler.RegisterDefaultLanguage("en");
         MessageHandler.AllowReceivingBroadcasts = true;
         MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", OnCheckLocation);
+    }
+
+    /// <summary>
+    /// Registers all required services
+    /// </summary>
+    protected override void OnRegisterServices(ModServiceProvider provider)
+    {
+        var menu = new MultiworldMenu();
+        provider.RegisterNewGameMenu(menu);
+        provider.RegisterLoadGameMenu(menu);
     }
 
     /// <summary>
@@ -45,8 +64,9 @@ public class Multiworld : BlasIIMod
     /// </summary>
     protected override void OnSceneLoaded(string sceneName)
     {
-        if (!_connection.Connected)
-            Connect("localhost", "B", null);
+        //if (!_connection.Connected)
+        //    Connect("localhost", "B", null);
+        IGNORE_DATA_CLEAR = false;
     }
 
     /// <summary>
@@ -64,24 +84,63 @@ public class Multiworld : BlasIIMod
         _locationSender.Send(location);
     }
 
-    private void Connect(string server, string player, string password)
+    /// <summary>
+    /// Saves the slot data
+    /// </summary>
+    public MultiworldSlotData SaveSlot()
+    {
+        return new MultiworldSlotData()
+        {
+            connection = CurrentConnection
+        };
+    }
+
+    /// <summary>
+    /// Loads the slot data
+    /// </summary>
+    public void LoadSlot(MultiworldSlotData data)
+    {
+        // It resets/loads data after finishing a menu, so skip until the next scene load
+        if (IGNORE_DATA_CLEAR)
+            return;
+
+        CurrentConnection = data.connection;
+    }
+
+    /// <summary>
+    /// Reset all slot data
+    /// </summary>
+    public void ResetSlot()
+    {
+        // It resets/loads data after finishing a menu, so skip until the next scene load
+        if (IGNORE_DATA_CLEAR)
+            return;
+
+        CurrentConnection = null;
+    }
+
+    /// <summary>
+    /// Attempts to connect to the AP server
+    /// </summary>
+    public void Connect(ConnectionInfo info)
     {
         ArchipelagoSession session;
         LoginResult result;
-        ModLog.Info($"Attempting to connect to {server} as {player} with password '{password}'");
+        ModLog.Info($"Attempting with {info}");
 
         try
         {
-            session = ArchipelagoSessionFactory.CreateSession(server);
+            session = ArchipelagoSessionFactory.CreateSession(info.Server);
             session.Socket.ErrorReceived += _errorReceiver.OnReceiveError;
             session.Items.ItemReceived += _itemReceiver.OnReceiveItem;
             _connection.UpdateSession(session);
 
-            result = session.TryConnectAndLogin("Blasphemous 2", player, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, password, true);
+            result = session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
         }
         catch (Exception ex)
         {
             result = new LoginFailure(ex.ToString());
+            CurrentConnection = null;
 
             // temp
             ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
@@ -91,17 +150,22 @@ public class Multiworld : BlasIIMod
         bool connected = result.Successful;
         ModLog.Info("Connection result: " + connected);
         _connection.InvokeConnect(result);
+        CurrentConnection = info;
+
+        // Should I not return here if not successful ???
 
         // parse slot data
         LoginSuccessful success = result as LoginSuccessful;
 
         // Load settings from slotdata
         RandomizerSettings settings = ((JObject)success.SlotData["settings"]).ToObject<RandomizerSettings>();
-        settings.Seed = CalculateMultiworldSeed(session.RoomState.Seed, player);
+        settings.Seed = CalculateMultiworldSeed(session.RoomState.Seed, info.Name);
     }
 
     private int CalculateMultiworldSeed(string seed, string name)
     {
         return Math.Abs(((seed.GetHashCode() / 2) + (name.GetHashCode() / 2)) % RandomizerSettings.MAX_SEED);
     }
+
+    internal static bool IGNORE_DATA_CLEAR = false;
 }
