@@ -2,6 +2,7 @@
 using Archipelago.MultiClient.Net.Enums;
 using BlasII.Framework.Menus;
 using BlasII.ModdingAPI;
+using BlasII.ModdingAPI.Persistence;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using BlasII.Randomizer.Multiworld.Receivers;
@@ -15,7 +16,7 @@ namespace BlasII.Randomizer.Multiworld;
 /// <summary>
 /// A multiworld client that allows the Randomizer to connect to AP
 /// </summary>
-public class Multiworld : BlasIIMod
+public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 {
     // Hopefully dont need this in the future
     private readonly ServerConnection _connection = new();
@@ -24,6 +25,11 @@ public class Multiworld : BlasIIMod
 
     private readonly ErrorReceiver _errorReceiver;
     private readonly ItemReceiver _itemReceiver;
+
+    /// <summary>
+    /// The current connection details
+    /// </summary>
+    public ConnectionInfo CurrentConnection { get; private set; } = null;
 
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION)
     {
@@ -75,6 +81,33 @@ public class Multiworld : BlasIIMod
         ModLog.Warn($"Sending location {locationId}");
         ItemLocation location = Main.Randomizer.ItemLocationStorage[locationId];
         _locationSender.Send(location);
+    }
+
+    /// <summary>
+    /// Saves the slot data
+    /// </summary>
+    public MultiworldSlotData SaveSlot()
+    {
+        return new MultiworldSlotData()
+        {
+            connection = CurrentConnection
+        };
+    }
+
+    /// <summary>
+    /// Loads the slot data
+    /// </summary>
+    public void LoadSlot(MultiworldSlotData data)
+    {
+        CurrentConnection = data.connection;
+    }
+
+    /// <summary>
+    /// Reset all slot data
+    /// </summary>
+    public void ResetSlot()
+    {
+        CurrentConnection = null;
     }
 
     private void Connect(string server, string player, string password)

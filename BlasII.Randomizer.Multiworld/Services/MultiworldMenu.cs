@@ -29,8 +29,8 @@ public class MultiworldMenu : ModMenu
         };
 
         _setServer = text.CreateOption("server", ui, new Vector2(0, 150), "option/server", false, true, 64);
-        _setServer = text.CreateOption("name", ui, new Vector2(0, 0), "option/name", false, true, 64);
-        _setServer = text.CreateOption("password", ui, new Vector2(0, -150), "option/password", false, true, 64);
+        _setName = text.CreateOption("name", ui, new Vector2(0, 0), "option/name", false, true, 64);
+        _setPassword = text.CreateOption("password", ui, new Vector2(0, -150), "option/password", false, true, 64);
     }
 
     /// <summary>
