@@ -62,7 +62,7 @@ public class MultiworldMenu : ModMenu
         };
 
         ModLog.Info($"Finishing menu with {info}");
-        Main.Multiworld.CurrentConnection = info;
+        Main.Multiworld.Connect(info);
 
         Multiworld.IGNORE_DATA_CLEAR = true;
     }

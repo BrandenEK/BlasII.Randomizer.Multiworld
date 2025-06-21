@@ -45,7 +45,7 @@ public class LocationSender
         MultiworldLocation[] locations = ((JArray)success.SlotData["locations"]).ToObject<MultiworldLocation[]>();
         _locationIds.AddRange(locations);
 
-        ModLog.Info("Recevied location info from slot data");
+        ModLog.Info("Received location info from slot data");
         foreach (var location in locations)
         {
             ModLog.Warn($"Internal: {location.InternalId}, Server: {location.ServerId}");
