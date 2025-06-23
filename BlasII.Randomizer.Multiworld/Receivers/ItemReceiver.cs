@@ -3,6 +3,7 @@ using Archipelago.MultiClient.Net.Models;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
+using Il2CppTGK.Game;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -57,10 +58,15 @@ public class ItemReceiver
                 continue;
 
             Item item = FindItemByName(info.ItemName);
+            ModLog.Info($"Giving item {info.ItemName} from {info.PlayerName}");
             ItemsReceived++;
 
             // Display recevied item
-            ModLog.Warn($"Got {info.ItemName} from {info.PlayerName}"); // temp
+            CoreCache.UINavigationHelper.ShowItemPopup(
+                "Received",
+                $"{info.ItemName} <color=#F8E4C6>from</color> {info.PlayerName}",
+                item.GetSprite(),
+                false);
 
             // Add item to inventory
             item.GiveReward();
