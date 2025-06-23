@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using BlasII.ModdingAPI;
+using BlasII.Randomizer.Multiworld.Models;
 using System.Collections.Generic;
 
 namespace BlasII.Randomizer.Multiworld.Receivers;
@@ -10,7 +11,7 @@ namespace BlasII.Randomizer.Multiworld.Receivers;
 /// </summary>
 public class ItemReceiver
 {
-    private readonly List<ItemInfo> _itemQueue = [];
+    private readonly List<QueuedItemInfo> _itemQueue = [];
 
     /// <summary>
     /// Adds the received item to a queue
@@ -21,8 +22,8 @@ public class ItemReceiver
         {
             ItemInfo item = helper.DequeueItem();
 
-            ModLog.Info($"Receiving item {item.ItemId}");
-            _itemQueue.Add(item);
+            ModLog.Info($"Receiving item {item.ItemId} at index {helper.Index}");
+            _itemQueue.Add(new QueuedItemInfo(item, helper.Index));
         }
     }
 
@@ -31,20 +32,26 @@ public class ItemReceiver
     /// </summary>
     public void OnUpdate()
     {
+        lock (ITEM_LOCK)
+        {
+            ProcessQueue();
+        }
+    }
+
+    private void ProcessQueue()
+    {
         if (_itemQueue.Count == 0)
             return;
 
-        foreach (ItemInfo item in _itemQueue)
+        foreach (QueuedItemInfo info in _itemQueue)
         {
-            ModLog.Info($"Processing item {item.ItemId}");
+            ModLog.Info($"Processing item {info.ItemName}");
 
             // Add item to inventory
             // ...
 
             // Display recevied item
-            string itemName = item.ItemDisplayName;
-            string playerName = item.Player.Name;
-            ModLog.Warn($"Got {itemName} from {playerName}");
+            ModLog.Warn($"Got {info.ItemName} from {info.PlayerName}");
         }
 
         _itemQueue.Clear();
