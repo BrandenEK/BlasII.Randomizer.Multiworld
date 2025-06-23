@@ -4,9 +4,9 @@ namespace BlasII.Randomizer.Multiworld.Models;
 
 public class MultiworldItem : Item
 {
-    public int Player { get; set; }
+    public string Player { get; set; }
 
-    public MultiworldItem(bool progression, int player)
+    public MultiworldItem(bool progression, string player)
     {
         Id = "internal location id";
         Name = "name of item";
