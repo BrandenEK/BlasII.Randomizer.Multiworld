@@ -14,6 +14,11 @@ public class ItemReceiver
     private readonly List<QueuedItemInfo> _itemQueue = [];
 
     /// <summary>
+    /// The number of items currently received
+    /// </summary>
+    public int ItemsReceived { get; set; }
+
+    /// <summary>
     /// Adds the received item to a queue
     /// </summary>
     public void OnReceiveItem(ReceivedItemsHelper helper)
@@ -22,7 +27,6 @@ public class ItemReceiver
         {
             ItemInfo item = helper.DequeueItem();
 
-            ModLog.Info($"Receiving item {item.ItemId} at index {helper.Index}");
             _itemQueue.Add(new QueuedItemInfo(item, helper.Index));
         }
     }
@@ -45,13 +49,18 @@ public class ItemReceiver
 
         foreach (QueuedItemInfo info in _itemQueue)
         {
-            ModLog.Info($"Processing item {info.ItemName}");
+            ModLog.Info($"Processing item {info.ItemName} at index {info.Index} ({ItemsReceived} items received)");
+
+            if (info.Index <= ItemsReceived)
+                continue;
+
+            ItemsReceived++;
 
             // Add item to inventory
             // ...
 
             // Display recevied item
-            ModLog.Warn($"Got {info.ItemName} from {info.PlayerName}");
+            ModLog.Warn($"Got {info.ItemName} from {info.PlayerName}"); // temp
         }
 
         _itemQueue.Clear();

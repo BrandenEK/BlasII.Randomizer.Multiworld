@@ -91,7 +91,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     {
         return new MultiworldSlotData()
         {
-            connection = CurrentConnection
+            connection = CurrentConnection,
+            itemsReceived = _itemReceiver.ItemsReceived,
         };
     }
 
@@ -105,6 +106,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
             return;
 
         CurrentConnection = data.connection;
+        _itemReceiver.ItemsReceived = data.itemsReceived;
     }
 
     /// <summary>
@@ -117,6 +119,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
             return;
 
         CurrentConnection = null;
+        _itemReceiver.ItemsReceived = 0;
     }
 
     /// <summary>

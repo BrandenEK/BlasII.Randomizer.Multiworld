@@ -12,4 +12,9 @@ public class MultiworldSlotData : SlotSaveData
     /// The connection details for the server room
     /// </summary>
     public ConnectionInfo connection;
+
+    /// <summary>
+    /// The current number of received items
+    /// </summary>
+    public int itemsReceived;
 }
