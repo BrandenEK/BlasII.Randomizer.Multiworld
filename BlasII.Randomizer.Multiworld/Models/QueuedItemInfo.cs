@@ -8,14 +8,9 @@ namespace BlasII.Randomizer.Multiworld.Models;
 public class QueuedItemInfo(ItemInfo info, int index)
 {
     /// <summary>
-    /// The name of the item
+    /// Data for the actual received item
     /// </summary>
-    public string ItemName { get; } = info.ItemDisplayName;
-
-    /// <summary>
-    /// The player who found it
-    /// </summary>
-    public string PlayerName { get; } = info.Player.Name;
+    public ItemInfo Item { get; } = info;
 
     /// <summary>
     /// THe received item index

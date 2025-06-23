@@ -15,11 +15,20 @@ namespace BlasII.Randomizer.Multiworld.Receivers;
 public class ItemReceiver
 {
     private readonly List<QueuedItemInfo> _itemQueue = [];
+    private readonly ServerConnection _connection;
 
     /// <summary>
     /// The number of items currently received
     /// </summary>
     public int ItemsReceived { get; set; }
+
+    /// <summary>
+    /// Initializes a new ItemReceiver
+    /// </summary>
+    public ItemReceiver(ServerConnection connection)
+    {
+        _connection = connection;
+    }
 
     /// <summary>
     /// Adds the received item to a queue
@@ -52,21 +61,27 @@ public class ItemReceiver
 
         foreach (QueuedItemInfo info in _itemQueue)
         {
-            ModLog.Info($"Processing item {info.ItemName} at index {info.Index} ({ItemsReceived} items received)");
+            string itemName = info.Item.ItemDisplayName;
+            string playerName = info.Item.Player.Name;
+
+            ModLog.Info($"Processing item {itemName} at index {info.Index} ({ItemsReceived} items received)");
 
             if (info.Index <= ItemsReceived)
                 continue;
 
-            Item item = FindItemByName(info.ItemName);
-            ModLog.Info($"Giving item {info.ItemName} from {info.PlayerName}");
+            Item item = FindItemByName(itemName);
+            ModLog.Info($"Giving item {itemName} from {playerName}");
             ItemsReceived++;
 
-            // Display recevied item
-            CoreCache.UINavigationHelper.ShowItemPopup(
-                "Received",
-                $"{info.ItemName} <color=#F8E4C6>from</color> {info.PlayerName}",
-                item.GetSprite(),
-                false);
+            if (info.Item.Player.Slot != _connection.Session.ConnectionInfo.Slot)
+            {
+                // Display recevied item if its from a different player
+                CoreCache.UINavigationHelper.ShowItemPopup(
+                    "Received",
+                    $"{itemName} <color=#F8E4C6>from</color> {playerName}",
+                    item.GetSprite(),
+                    false);
+            }
 
             // Add item to inventory
             item.GiveReward();

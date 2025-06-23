@@ -36,7 +36,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
         _locationSender = new LocationSender(_connection);
 
         _errorReceiver = new ErrorReceiver();
-        _itemReceiver = new ItemReceiver();
+        _itemReceiver = new ItemReceiver(_connection);
     }
 
     /// <summary>
