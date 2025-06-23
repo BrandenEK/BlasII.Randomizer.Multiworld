@@ -54,12 +54,7 @@ public class MultiworldMenu : ModMenu
     {
         // Validate connected first
 
-        var info = new ConnectionInfo()
-        {
-            Server = _setServer.CurrentValue,
-            Name = _setName.CurrentValue,
-            Password = _setPassword.CurrentValue,
-        };
+        var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
 
         ModLog.Info($"Finishing menu with {info}");
         Main.Multiworld.Connect(info);
