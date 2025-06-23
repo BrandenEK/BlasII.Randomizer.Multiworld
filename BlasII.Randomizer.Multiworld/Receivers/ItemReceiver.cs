@@ -1,8 +1,10 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using BlasII.ModdingAPI;
+using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BlasII.Randomizer.Multiworld.Receivers;
 
@@ -54,16 +56,31 @@ public class ItemReceiver
             if (info.Index <= ItemsReceived)
                 continue;
 
+            Item item = FindItemByName(info.ItemName);
             ItemsReceived++;
-
-            // Add item to inventory
-            // ...
 
             // Display recevied item
             ModLog.Warn($"Got {info.ItemName} from {info.PlayerName}"); // temp
+
+            // Add item to inventory
+            item.GiveReward();
         }
 
         _itemQueue.Clear();
+    }
+
+    private Item FindItemByName(string name)
+    {
+        Item item = Main.Randomizer.ItemStorage.AsSequence.FirstOrDefault(x => x.Name == name);
+        // This does not get quest items with a duplicate name
+
+        if (item == null)
+        {
+            ModLog.Error($"{name} is not a valid item name");
+            return Main.Randomizer.ItemStorage.InvalidItem;
+        }
+
+        return item;
     }
 
     private static readonly object ITEM_LOCK = new();
