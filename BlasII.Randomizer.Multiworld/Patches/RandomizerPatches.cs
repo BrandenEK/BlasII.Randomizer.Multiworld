@@ -69,7 +69,7 @@ class ItemExtensions_GetSprite_Patch
         if (item is not MultiworldItem mwitem)
             return true;
 
-        __result = Main.Randomizer.EmbeddedIconStorage.GetImage("Cherub");
+        __result = Main.Multiworld.IconStorage.ItemSprite;
         return false;
     }
 }
