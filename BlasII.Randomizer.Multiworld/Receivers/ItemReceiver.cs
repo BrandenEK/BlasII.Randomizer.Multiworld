@@ -77,8 +77,8 @@ public class ItemReceiver
             {
                 // Display recevied item if its from a different player
                 CoreCache.UINavigationHelper.ShowItemPopup(
-                    "Received",
-                    $"{itemName} <color=#F8E4C6>from</color> {playerName}",
+                    Main.Multiworld.LocalizationHandler.Localize("item/given"),
+                    $"{itemName} <color=#F8E4C6>{Main.Multiworld.LocalizationHandler.Localize("item/from")}</color> {playerName}",
                     item.GetSprite(),
                     false);
             }

@@ -9,7 +9,7 @@ public class MultiworldItem : Item
     public MultiworldItem(bool progression, string player)
     {
         Id = "internal location id";
-        Name = "name of item";
+        Name = "Item name";
         Type = ItemType.Invalid;
         Progression = progression; // Replaced with 'class'
         Count = 0;
