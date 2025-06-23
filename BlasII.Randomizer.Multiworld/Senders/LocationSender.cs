@@ -14,7 +14,6 @@ namespace BlasII.Randomizer.Multiworld.Senders;
 public class LocationSender
 {
     private readonly List<MultiworldLocation> _locationIds = [];
-
     private readonly ServerConnection _connection;
 
     /// <summary>

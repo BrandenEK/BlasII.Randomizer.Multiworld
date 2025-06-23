@@ -1,7 +1,11 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using BlasII.ModdingAPI;
+using BlasII.Randomizer.Models;
+using BlasII.Randomizer.Multiworld.Models;
+using Il2CppTGK.Game;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BlasII.Randomizer.Multiworld.Receivers;
 
@@ -10,7 +14,21 @@ namespace BlasII.Randomizer.Multiworld.Receivers;
 /// </summary>
 public class ItemReceiver
 {
-    private readonly List<ItemInfo> _itemQueue = [];
+    private readonly List<QueuedItemInfo> _itemQueue = [];
+    private readonly ServerConnection _connection;
+
+    /// <summary>
+    /// The number of items currently received
+    /// </summary>
+    public int ItemsReceived { get; set; }
+
+    /// <summary>
+    /// Initializes a new ItemReceiver
+    /// </summary>
+    public ItemReceiver(ServerConnection connection)
+    {
+        _connection = connection;
+    }
 
     /// <summary>
     /// Adds the received item to a queue
@@ -21,8 +39,7 @@ public class ItemReceiver
         {
             ItemInfo item = helper.DequeueItem();
 
-            ModLog.Info($"Receiving item {item.ItemId}");
-            _itemQueue.Add(item);
+            _itemQueue.Add(new QueuedItemInfo(item, helper.Index));
         }
     }
 
@@ -31,23 +48,60 @@ public class ItemReceiver
     /// </summary>
     public void OnUpdate()
     {
+        lock (ITEM_LOCK)
+        {
+            ProcessQueue();
+        }
+    }
+
+    private void ProcessQueue()
+    {
         if (_itemQueue.Count == 0)
             return;
 
-        foreach (ItemInfo item in _itemQueue)
+        foreach (QueuedItemInfo info in _itemQueue)
         {
-            ModLog.Info($"Processing item {item.ItemId}");
+            string itemName = info.Item.ItemDisplayName;
+            string playerName = info.Item.Player.Name;
+
+            ModLog.Info($"Processing item {itemName} at index {info.Index} ({ItemsReceived} items received)");
+
+            if (info.Index <= ItemsReceived)
+                continue;
+
+            Item item = FindItemByName(itemName);
+            ModLog.Info($"Giving item {itemName} from {playerName}");
+            ItemsReceived++;
+
+            if (info.Item.Player.Slot != _connection.Session.ConnectionInfo.Slot)
+            {
+                // Display recevied item if its from a different player
+                CoreCache.UINavigationHelper.ShowItemPopup(
+                    "Received",
+                    $"{itemName} <color=#F8E4C6>from</color> {playerName}",
+                    item.GetSprite(),
+                    false);
+            }
 
             // Add item to inventory
-            // ...
-
-            // Display recevied item
-            string itemName = item.ItemDisplayName;
-            string playerName = item.Player.Name;
-            ModLog.Warn($"Got {itemName} from {playerName}");
+            item.GiveReward();
         }
 
         _itemQueue.Clear();
+    }
+
+    private Item FindItemByName(string name)
+    {
+        Item item = Main.Randomizer.ItemStorage.AsSequence.FirstOrDefault(x => x.Name == name);
+        // This does not get quest items with a duplicate name
+
+        if (item == null)
+        {
+            ModLog.Error($"{name} is not a valid item name");
+            return Main.Randomizer.ItemStorage.InvalidItem;
+        }
+
+        return item;
     }
 
     private static readonly object ITEM_LOCK = new();
