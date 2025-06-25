@@ -8,6 +8,7 @@ using BlasII.Randomizer.Multiworld.Models;
 using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
 using BlasII.Randomizer.Multiworld.Services;
+using BlasII.Randomizer.Multiworld.Storages;
 using Newtonsoft.Json.Linq;
 using System;
 
@@ -25,6 +26,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
     private readonly ErrorReceiver _errorReceiver;
     private readonly ItemReceiver _itemReceiver;
+
+    internal IconStorage IconStorage { get; private set; }
 
     /// <summary>
     /// The current connection details
@@ -47,6 +50,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
         LocalizationHandler.RegisterDefaultLanguage("en");
         MessageHandler.AllowReceivingBroadcasts = true;
         MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", OnCheckLocation);
+
+        IconStorage = new IconStorage(FileHandler);
     }
 
     /// <summary>

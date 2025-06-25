@@ -4,3 +4,11 @@ lang: en
 option/server: Server IP:
 option/name: Player name:
 option/password: Password:
+
+# Items
+item/given: Received
+item/from: from
+item/for: for
+item/desc/filler: An item for another player
+item/desc/useful: An item for another player
+item/desc/progression: An item for another player
