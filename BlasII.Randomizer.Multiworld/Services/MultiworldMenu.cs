@@ -1,4 +1,5 @@
-﻿using BlasII.Framework.Menus;
+﻿using Archipelago.MultiClient.Net;
+using BlasII.Framework.Menus;
 using BlasII.Framework.Menus.Options;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Multiworld.Models;
@@ -11,10 +12,21 @@ namespace BlasII.Randomizer.Multiworld.Services;
 /// </summary>
 public class MultiworldMenu : ModMenu
 {
+    private readonly ServerConnection _connection;
+
     /// <summary>
     /// Maximum priority
     /// </summary>
     protected override int Priority { get; } = int.MaxValue;
+
+    /// <summary>
+    /// Initialize the menu connection
+    /// </summary>
+    public MultiworldMenu(ServerConnection connection)
+    {
+        _connection = connection;
+        _connection.OnConnect += OnConnect;
+    }
 
     /// <summary>
     /// Creates all the UI for the menu
@@ -47,6 +59,16 @@ public class MultiworldMenu : ModMenu
         _setPassword.CurrentValue = info?.Password ?? string.Empty;
     }
 
+    public override void OnUpdate()
+    {
+        base.OnUpdate();
+
+        if (UnityEngine.Input.GetKeyDown(KeyCode.Delete))
+        {
+            StartConnectProcess();
+        }
+    }
+
     /// <summary>
     /// Store client settings from menu
     /// </summary>
@@ -54,12 +76,28 @@ public class MultiworldMenu : ModMenu
     {
         // Validate connected first
 
-        var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
-
-        ModLog.Info($"Finishing menu with {info}");
-        Main.Multiworld.Connect(info);
 
         Multiworld.IGNORE_DATA_CLEAR = true;
+    }
+
+    private void StartConnectProcess()
+    {
+        var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
+        Main.Multiworld.Connect(info);
+    }
+
+    private void OnConnect(LoginResult result)
+    {
+        if (result is LoginFailure failure)
+        {
+            // TODO: Display failure in menu
+            return;
+        }
+
+        if (result is LoginSuccessful success)
+        {
+            // TODO: Send scouts, then wait for response before finishing the menu
+        }
     }
 
     private TextOption _setServer;
