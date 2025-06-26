@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using BlasII.ModdingAPI;
+using BlasII.ModdingAPI.Helpers;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using Il2CppTGK.Game;
@@ -48,6 +49,9 @@ public class ItemReceiver
     /// </summary>
     public void OnUpdate()
     {
+        if (!SceneHelper.GameSceneLoaded || CoreCache.Input.InputBlocked)
+            return;
+
         lock (ITEM_LOCK)
         {
             ProcessQueue();
