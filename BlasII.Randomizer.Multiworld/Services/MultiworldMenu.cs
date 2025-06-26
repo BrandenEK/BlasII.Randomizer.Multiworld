@@ -1,7 +1,12 @@
-﻿using BlasII.Framework.Menus;
+﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Models;
+using BlasII.Framework.Menus;
 using BlasII.Framework.Menus.Options;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Multiworld.Models;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Services;
@@ -11,10 +16,21 @@ namespace BlasII.Randomizer.Multiworld.Services;
 /// </summary>
 public class MultiworldMenu : ModMenu
 {
+    private readonly ServerConnection _connection;
+
     /// <summary>
     /// Maximum priority
     /// </summary>
     protected override int Priority { get; } = int.MaxValue;
+
+    /// <summary>
+    /// Initialize the menu connection
+    /// </summary>
+    public MultiworldMenu(ServerConnection connection)
+    {
+        _connection = connection;
+        _connection.OnConnect += OnConnect;
+    }
 
     /// <summary>
     /// Creates all the UI for the menu
@@ -47,6 +63,16 @@ public class MultiworldMenu : ModMenu
         _setPassword.CurrentValue = info?.Password ?? string.Empty;
     }
 
+    public override void OnUpdate()
+    {
+        base.OnUpdate();
+
+        if (UnityEngine.Input.GetKeyDown(KeyCode.Delete))
+        {
+            StartConnectProcess();
+        }
+    }
+
     /// <summary>
     /// Store client settings from menu
     /// </summary>
@@ -54,12 +80,29 @@ public class MultiworldMenu : ModMenu
     {
         // Validate connected first
 
-        var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
-
-        ModLog.Info($"Finishing menu with {info}");
-        Main.Multiworld.Connect(info);
 
         Multiworld.IGNORE_DATA_CLEAR = true;
+    }
+
+    private void StartConnectProcess()
+    {
+        var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
+        Main.Multiworld.Connect(info);
+    }
+
+    private void OnConnect(LoginResult result)
+    {
+        if (result is LoginFailure failure)
+        {
+            // TODO: Display failure in menu
+            ModLog.Error("Faulure;");
+            return;
+        }
+
+        if (result is LoginSuccessful success)
+        {
+            // TODO: finish the menu
+        }
     }
 
     private TextOption _setServer;
@@ -67,6 +110,6 @@ public class MultiworldMenu : ModMenu
     private TextOption _setPassword;
 
     private const int TEXT_SIZE = 56;
-    private readonly Color SILVER = new Color32(192, 192, 192, 255);
-    private readonly Color YELLOW = new Color32(255, 231, 65, 255);
+    private readonly Color32 SILVER = new Color32(192, 192, 192, 255);
+    private readonly Color32 YELLOW = new Color32(255, 231, 65, 255);
 }

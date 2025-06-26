@@ -3,7 +3,7 @@ using BlasII.Randomizer.Handlers;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using HarmonyLib;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Patches;
@@ -16,7 +16,7 @@ class ItemHandler_GetItemAtLocation_Patch
 {
     public static bool Prefix(string locationId, ref Item __result)
     {
-        __result = new MultiworldItem(false, "Player name");
+        __result = Main.Multiworld.Scouter.GetItemAtLocation(locationId);
         return false;
     }
 }
@@ -31,13 +31,8 @@ class ItemHandler_ShuffleItems_Pstch
     {
         ModLog.Info("Overriding ItemHandler shuffle");
 
-        var mapping = new Dictionary<string, string>();
-        foreach (var location in Main.Randomizer.ItemLocationStorage.AsSequence)
-        {
-            mapping.Add(location.Id, location.Id);
-        }
-
-        __instance.MappedItems = mapping;
+        string itemId = "MW";
+        __instance.MappedItems = Main.Randomizer.ItemLocationStorage.AsSequence.ToDictionary(x => x.Id, x => itemId);
         return false;
     }
 }
@@ -69,7 +64,7 @@ class ItemExtensions_GetSprite_Patch
         if (item is not MultiworldItem mwitem)
             return true;
 
-        __result = Main.Multiworld.IconStorage.ItemSprite;
+        __result = mwitem.GetSprite();
         return false;
     }
 }
@@ -85,7 +80,7 @@ class ItemExtensions_GetName_Patch
         if (item is not MultiworldItem mwitem)
             return true;
 
-        __result = $"{mwitem.Name} <color=#F8E4C6>{Main.Multiworld.LocalizationHandler.Localize("item/for")}</color> {mwitem.Player}";
+        __result = mwitem.GetName();
         return false;
     }
 }
@@ -101,8 +96,7 @@ class ItemExtensions_GetDescription_Patch
         if (item is not MultiworldItem mwitem)
             return true;
 
-        string key = $"item/desc/{(mwitem.Progression ? "progression" : "filler")}";
-        __result = Main.Multiworld.LocalizationHandler.Localize(key);
+        __result = mwitem.GetDescription();
         return false;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Files;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BlasII.Randomizer.Multiworld.Storages;
@@ -10,6 +11,16 @@ namespace BlasII.Randomizer.Multiworld.Storages;
 public class IdStorage
 {
     private readonly MWID[] _ids;
+
+    /// <summary>
+    /// Gets all internal ids
+    /// </summary>
+    public IEnumerable<string> InternalIds => _ids.Select(x => x.InternalId);
+
+    /// <summary>
+    /// Gets all server ids
+    /// </summary>
+    public IEnumerable<long> ServerIds => _ids.Select(x => x.ServerId);
 
     /// <summary>
     /// Loads all required ids

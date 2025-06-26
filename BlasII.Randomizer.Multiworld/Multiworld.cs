@@ -31,6 +31,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     internal IdStorage ItemStorage { get; private set; }
     internal IdStorage LocationStorage { get; private set; }
 
+    internal Scouter Scouter { get; private set; }
+
     /// <summary>
     /// The current connection details
     /// </summary>
@@ -56,6 +58,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
         IconStorage = new IconStorage(FileHandler);
         ItemStorage = new IdStorage(FileHandler, "itemids.json");
         LocationStorage = new IdStorage(FileHandler, "locationids.json");
+
+        Scouter = new Scouter(_connection);
     }
 
     /// <summary>
@@ -63,7 +67,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     /// </summary>
     protected override void OnRegisterServices(ModServiceProvider provider)
     {
-        var menu = new MultiworldMenu();
+        var menu = new MultiworldMenu(_connection);
         provider.RegisterNewGameMenu(menu);
         provider.RegisterLoadGameMenu(menu);
     }
