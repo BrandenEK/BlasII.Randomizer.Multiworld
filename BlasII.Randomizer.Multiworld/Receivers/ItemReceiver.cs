@@ -1,11 +1,11 @@
 ﻿using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Models;
 using BlasII.ModdingAPI;
+using BlasII.ModdingAPI.Helpers;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using Il2CppTGK.Game;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BlasII.Randomizer.Multiworld.Receivers;
 
@@ -48,6 +48,9 @@ public class ItemReceiver
     /// </summary>
     public void OnUpdate()
     {
+        if (!SceneHelper.GameSceneLoaded || CoreCache.Input.InputBlocked)
+            return;
+
         lock (ITEM_LOCK)
         {
             ProcessQueue();
@@ -69,8 +72,8 @@ public class ItemReceiver
             if (info.Index <= ItemsReceived)
                 continue;
 
-            Item item = FindItemByName(itemName);
-            ModLog.Info($"Giving item {itemName} from {playerName}");
+            Item item = FindItemById(info.Item.ItemId);
+            ModLog.Info($"Giving item {item.Id} from {playerName}");
             ItemsReceived++;
 
             if (info.Item.Player.Slot != _connection.Session.ConnectionInfo.Slot)
@@ -78,7 +81,9 @@ public class ItemReceiver
                 // Display recevied item if its from a different player
                 CoreCache.UINavigationHelper.ShowItemPopup(
                     Main.Multiworld.LocalizationHandler.Localize("item/given"),
-                    $"{itemName} <color=#F8E4C6>{Main.Multiworld.LocalizationHandler.Localize("item/from")}</color> {playerName}",
+                    item.IsValid()
+                        ? $"{itemName} <color=#F8E4C6>{Main.Multiworld.LocalizationHandler.Localize("item/from")}</color> {playerName}"
+                        : item.GetName(),
                     item.GetSprite(),
                     false);
             }
@@ -90,18 +95,23 @@ public class ItemReceiver
         _itemQueue.Clear();
     }
 
-    private Item FindItemByName(string name)
+    private Item FindItemById(long id)
     {
-        Item item = Main.Randomizer.ItemStorage.AsSequence.FirstOrDefault(x => x.Name == name);
-        // This does not get quest items with a duplicate name
+        string itemId = Main.Multiworld.ItemStorage.ServerToInternalId(id);
 
-        if (item == null)
+        if (!itemId.Contains(','))
+            return Main.Randomizer.ItemStorage[itemId];
+
+        string[] itemIds = itemId.Split(',');
+
+        for (int i = 0; i < itemIds.Length; i++)
         {
-            ModLog.Error($"{name} is not a valid item name");
-            return Main.Randomizer.ItemStorage.InvalidItem;
+            if (!Main.Randomizer.ItemHandler.IsItemCollected(itemIds[i]))
+                return Main.Randomizer.ItemStorage[itemIds[i]];
         }
 
-        return item;
+        ModLog.Error($"All of {itemId} has already been collected");
+        return Main.Randomizer.ItemStorage.InvalidItem;
     }
 
     private static readonly object ITEM_LOCK = new();

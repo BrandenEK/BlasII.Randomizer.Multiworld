@@ -36,14 +36,14 @@ public class Scouter
             return item;
 
         ModLog.Error($"Location {locationId} was not scouted");
-        return MultiworldErrorItem.Create(locationId);
+        return MultiworldErrorItem.Create();
     }
 
     private async void OnConnect(LoginResult result)
     {
         _mappedItems.Clear();
 
-        if (result is not LoginSuccessful success)
+        if (result is not LoginSuccessful)
             return;
 
         Dictionary<long, ScoutedItemInfo> scouts = await _connection.Session.Locations.ScoutLocationsAsync(
@@ -52,15 +52,12 @@ public class Scouter
 
         foreach (var info in scouts.Values)
         {
-            string internalId = Main.Multiworld.LocationStorage.ServerToInternalId(info.LocationId);
-            string itemName = info.ItemDisplayName;
-            bool progression = info.Flags.HasFlag(ItemFlags.Advancement) || info.Flags.HasFlag(ItemFlags.Trap);
-
             MultiworldItem item = info.Player.Slot == _connection.Session.ConnectionInfo.Slot
-                ? MultiworldSelfItem.Create(internalId, itemName, Main.Randomizer.ItemStorage["RB01"])
-                : MultiworldOtherItem.Create(internalId, itemName, progression, info.Player.Name);
+                ? MultiworldSelfItem.Create(info)
+                : MultiworldOtherItem.Create(info);
 
-            _mappedItems.Add(internalId, item);
+            string locationId = Main.Multiworld.LocationStorage.ServerToInternalId(info.LocationId);
+            _mappedItems.Add(locationId, item);
         }
 
         ModLog.Info($"Scouted {_mappedItems.Count} locations");
