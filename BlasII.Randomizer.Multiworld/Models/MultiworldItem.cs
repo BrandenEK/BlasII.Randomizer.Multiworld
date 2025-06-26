@@ -57,11 +57,11 @@ public class MultiworldSelfItem : MultiworldItem
     /// <summary>
     /// Creates a new <see cref="MultiworldSelfItem"/>
     /// </summary>
-    public static MultiworldSelfItem Create(string id, string name, Item item)
+    public static MultiworldSelfItem Create(string name, Item item)
     {
         return new MultiworldSelfItem(item)
         {
-            Id = id,
+            Id = "MW",
             Name = name,
             Type = ItemType.Invalid,
             Progression = item.Progression,
@@ -106,11 +106,11 @@ public class MultiworldOtherItem : MultiworldItem
     /// <summary>
     /// Creates a new <see cref="MultiworldOtherItem"/>
     /// </summary>
-    public static MultiworldOtherItem Create(string id, string name, bool progression, string player)
+    public static MultiworldOtherItem Create(string name, bool progression, string player)
     {
         return new MultiworldOtherItem(player)
         {
-            Id = id,
+            Id = "MW",
             Name = name,
             Type = ItemType.Invalid,
             Progression = progression,
@@ -145,11 +145,11 @@ public class MultiworldErrorItem : MultiworldItem
     /// <summary>
     /// Creates a new <see cref="MultiworldErrorItem"/>
     /// </summary>
-    public static MultiworldErrorItem Create(string id)
+    public static MultiworldErrorItem Create()
     {
         return new MultiworldErrorItem()
         {
-            Id = id,
+            Id = "MW",
             Name = "Unknown item",
             Type = ItemType.Invalid,
             Progression = false,
