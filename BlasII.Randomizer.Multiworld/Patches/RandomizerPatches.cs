@@ -3,7 +3,7 @@ using BlasII.Randomizer.Handlers;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
 using HarmonyLib;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Patches;
@@ -31,13 +31,8 @@ class ItemHandler_ShuffleItems_Pstch
     {
         ModLog.Info("Overriding ItemHandler shuffle");
 
-        var mapping = new Dictionary<string, string>();
-        foreach (var location in Main.Randomizer.ItemLocationStorage.AsSequence)
-        {
-            mapping.Add(location.Id, location.Id);
-        }
-
-        __instance.MappedItems = mapping;
+        string itemId = "MW";
+        __instance.MappedItems = Main.Randomizer.ItemLocationStorage.AsSequence.ToDictionary(x => x.Id, x => itemId);
         return false;
     }
 }

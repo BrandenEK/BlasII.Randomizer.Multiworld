@@ -38,6 +38,6 @@ public class Scouter
 
     private void OnConnect(LoginResult result)
     {
-        throw new System.NotImplementedException();
+
     }
 }

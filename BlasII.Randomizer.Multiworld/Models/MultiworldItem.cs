@@ -133,13 +133,13 @@ public class MultiworldErrorItem : MultiworldItem
     /// <inheritdoc/>
     public override string GetName()
     {
-        return "Unknown item";
+        return Name;
     }
 
     /// <inheritdoc/>
     public override string GetDescription()
     {
-        return "Unknown player";
+        return Name;
     }
 
     /// <summary>
