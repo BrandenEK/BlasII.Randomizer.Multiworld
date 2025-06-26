@@ -1,8 +1,12 @@
 ﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Models;
 using BlasII.Framework.Menus;
 using BlasII.Framework.Menus.Options;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Multiworld.Models;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Services;
@@ -86,16 +90,31 @@ public class MultiworldMenu : ModMenu
         Main.Multiworld.Connect(info);
     }
 
-    private void OnConnect(LoginResult result)
+    private async void OnConnect(LoginResult result)
     {
         if (result is LoginFailure failure)
         {
             // TODO: Display failure in menu
+            ModLog.Error("Faulure;");
             return;
         }
 
         if (result is LoginSuccessful success)
         {
+            Dictionary<long, ScoutedItemInfo> scouts = await _connection.Session.Locations.ScoutLocationsAsync(
+                HintCreationPolicy.None,
+                Main.Multiworld.LocationStorage.ServerIds.ToArray());
+
+            foreach (var info in scouts.Values)
+            {
+                long serverId = info.LocationId;
+                string itemName = info.ItemDisplayName;
+                int player = info.Player.Slot;
+                var flags = info.Flags;
+
+                ModLog.Warn($"Scouted item at {serverId}: {itemName} for player {player}");
+            }
+
             // TODO: Send scouts, then wait for response before finishing the menu
         }
     }
@@ -105,6 +124,6 @@ public class MultiworldMenu : ModMenu
     private TextOption _setPassword;
 
     private const int TEXT_SIZE = 56;
-    private readonly Color SILVER = new Color32(192, 192, 192, 255);
-    private readonly Color YELLOW = new Color32(255, 231, 65, 255);
+    private readonly Color32 SILVER = new Color32(192, 192, 192, 255);
+    private readonly Color32 YELLOW = new Color32(255, 231, 65, 255);
 }

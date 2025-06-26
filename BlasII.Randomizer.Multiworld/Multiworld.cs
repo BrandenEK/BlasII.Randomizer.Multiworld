@@ -63,7 +63,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     /// </summary>
     protected override void OnRegisterServices(ModServiceProvider provider)
     {
-        var menu = new MultiworldMenu();
+        var menu = new MultiworldMenu(_connection);
         provider.RegisterNewGameMenu(menu);
         provider.RegisterLoadGameMenu(menu);
     }
