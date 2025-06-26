@@ -28,6 +28,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     private readonly ItemReceiver _itemReceiver;
 
     internal IconStorage IconStorage { get; private set; }
+    internal IdStorage ItemStorage { get; private set; }
+    internal IdStorage LocationStorage { get; private set; }
 
     /// <summary>
     /// The current connection details
@@ -52,6 +54,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
         MessageHandler.AddMessageListener("BlasII.Randomizer", "LOCATION", OnCheckLocation);
 
         IconStorage = new IconStorage(FileHandler);
+        ItemStorage = new IdStorage(FileHandler, "itemids.json");
+        LocationStorage = new IdStorage(FileHandler, "locationids.json");
     }
 
     /// <summary>
