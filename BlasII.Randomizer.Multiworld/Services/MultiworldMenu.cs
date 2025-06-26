@@ -90,7 +90,7 @@ public class MultiworldMenu : ModMenu
         Main.Multiworld.Connect(info);
     }
 
-    private async void OnConnect(LoginResult result)
+    private void OnConnect(LoginResult result)
     {
         if (result is LoginFailure failure)
         {
@@ -101,21 +101,7 @@ public class MultiworldMenu : ModMenu
 
         if (result is LoginSuccessful success)
         {
-            Dictionary<long, ScoutedItemInfo> scouts = await _connection.Session.Locations.ScoutLocationsAsync(
-                HintCreationPolicy.None,
-                Main.Multiworld.LocationStorage.ServerIds.ToArray());
-
-            foreach (var info in scouts.Values)
-            {
-                long serverId = info.LocationId;
-                string itemName = info.ItemDisplayName;
-                int player = info.Player.Slot;
-                var flags = info.Flags;
-
-                ModLog.Warn($"Scouted item at {serverId}: {itemName} for player {player}");
-            }
-
-            // TODO: Send scouts, then wait for response before finishing the menu
+            // TODO: finish the menu
         }
     }
 

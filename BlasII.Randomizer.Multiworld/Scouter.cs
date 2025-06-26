@@ -1,7 +1,10 @@
 ﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Models;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Multiworld.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BlasII.Randomizer.Multiworld;
 
@@ -36,8 +39,30 @@ public class Scouter
         return MultiworldErrorItem.Create(locationId);
     }
 
-    private void OnConnect(LoginResult result)
+    private async void OnConnect(LoginResult result)
     {
+        _mappedItems.Clear();
 
+        if (result is not LoginSuccessful success)
+            return;
+
+        Dictionary<long, ScoutedItemInfo> scouts = await _connection.Session.Locations.ScoutLocationsAsync(
+                HintCreationPolicy.None,
+                Main.Multiworld.LocationStorage.ServerIds.ToArray());
+
+        foreach (var info in scouts.Values)
+        {
+            string internalId = Main.Multiworld.LocationStorage.ServerToInternalId(info.LocationId);
+            string itemName = info.ItemDisplayName;
+            bool progression = info.Flags.HasFlag(ItemFlags.Advancement) || info.Flags.HasFlag(ItemFlags.Trap);
+
+            MultiworldItem item = info.Player.Slot == _connection.Session.ConnectionInfo.Slot
+                ? MultiworldSelfItem.Create(internalId, itemName, Main.Randomizer.ItemStorage["RB01"])
+                : MultiworldOtherItem.Create(internalId, itemName, progression, info.Player.Name);
+
+            _mappedItems.Add(internalId, item);
+        }
+
+        ModLog.Info($"Scouted {_mappedItems.Count} locations");
     }
 }
