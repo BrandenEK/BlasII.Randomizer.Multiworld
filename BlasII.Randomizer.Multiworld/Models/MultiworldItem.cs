@@ -1,4 +1,6 @@
-﻿using BlasII.Randomizer.Models;
+﻿using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Models;
+using BlasII.Randomizer.Models;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Models;
@@ -57,12 +59,17 @@ public class MultiworldSelfItem : MultiworldItem
     /// <summary>
     /// Creates a new <see cref="MultiworldSelfItem"/>
     /// </summary>
-    public static MultiworldSelfItem Create(string name, Item item)
+    public static MultiworldSelfItem Create(ScoutedItemInfo info)
     {
+        string itemId = Main.Multiworld.ItemStorage.ServerToInternalId(info.ItemId);
+        Item item = Main.Randomizer.ItemStorage[itemId.Contains(',')
+            ? itemId[..itemId.IndexOf(',')]
+            : itemId];
+
         return new MultiworldSelfItem(item)
         {
             Id = "MW",
-            Name = name,
+            Name = info.ItemDisplayName,
             Type = ItemType.Invalid,
             Progression = item.Progression,
             Count = 0
@@ -106,14 +113,14 @@ public class MultiworldOtherItem : MultiworldItem
     /// <summary>
     /// Creates a new <see cref="MultiworldOtherItem"/>
     /// </summary>
-    public static MultiworldOtherItem Create(string name, bool progression, string player)
+    public static MultiworldOtherItem Create(ScoutedItemInfo info)
     {
-        return new MultiworldOtherItem(player)
+        return new MultiworldOtherItem(info.Player.Name)
         {
             Id = "MW",
-            Name = name,
+            Name = info.ItemDisplayName,
             Type = ItemType.Invalid,
-            Progression = progression,
+            Progression = info.Flags.HasFlag(ItemFlags.Advancement) || info.Flags.HasFlag(ItemFlags.Trap),
             Count = 0
         };
     }
