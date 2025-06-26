@@ -118,3 +118,42 @@ public class MultiworldOtherItem : MultiworldItem
         };
     }
 }
+
+/// <summary>
+/// An item in this world that doesn't exist
+/// </summary>
+public class MultiworldErrorItem : MultiworldItem
+{
+    /// <inheritdoc/>
+    public override Sprite GetSprite()
+    {
+        return Main.Multiworld.IconStorage.ItemSprite;
+    }
+
+    /// <inheritdoc/>
+    public override string GetName()
+    {
+        return "Unknown item";
+    }
+
+    /// <inheritdoc/>
+    public override string GetDescription()
+    {
+        return "Unknown player";
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="MultiworldErrorItem"/>
+    /// </summary>
+    public static MultiworldErrorItem Create(string id)
+    {
+        return new MultiworldErrorItem()
+        {
+            Id = id,
+            Name = "Unknown item",
+            Type = ItemType.Invalid,
+            Progression = false,
+            Count = 0
+        };
+    }
+}

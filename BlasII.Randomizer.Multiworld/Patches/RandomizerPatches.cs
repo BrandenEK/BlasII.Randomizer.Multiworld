@@ -16,9 +16,7 @@ class ItemHandler_GetItemAtLocation_Patch
 {
     public static bool Prefix(string locationId, ref Item __result)
     {
-        // TODO: get the proper item from a storage
-        __result = new MultiworldItem(false, "Player name");
-        
+        __result = Main.Multiworld.Scouter.GetItemAtLocation(locationId);
         return false;
     }
 }
