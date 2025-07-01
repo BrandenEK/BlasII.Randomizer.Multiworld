@@ -4,6 +4,7 @@ using BlasII.Framework.Menus.Options;
 using BlasII.Framework.UI;
 using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Helpers;
+using BlasII.ModdingAPI.Input;
 using BlasII.Randomizer.Multiworld.Models;
 using Il2CppTGK.Game.Components.UI;
 using MelonLoader;
@@ -84,11 +85,11 @@ public class MultiworldMenu : ModMenu
     /// </summary>
     public override void OnUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        if (Main.Multiworld.InputHandler.GetButtonDown(ButtonType.UIConfirm))
         {
             MelonCoroutines.Start(Connect());
         }
-        else if (Input.GetKeyDown(KeyCode.Escape))
+        else if (Main.Multiworld.InputHandler.GetButtonDown(ButtonType.UICancel))
         {
             _menuMod.ShowPreviousMenu();
         }
