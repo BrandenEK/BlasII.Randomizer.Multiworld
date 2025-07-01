@@ -1,5 +1,6 @@
-﻿using BlasII.Randomizer.Models;
-using BlasII.Randomizer.Multiworld.Models;
+﻿using BlasII.Randomizer.Multiworld.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlasII.Randomizer.Multiworld.Senders;
 
@@ -21,12 +22,24 @@ public class LocationSender
     /// <summary>
     /// Sends a single checked location to the server
     /// </summary>
-    public void Send(ItemLocation location)
+    public void Send(string location)
     {
         if (!_connection.Connected)
             return;
 
-        long id = Main.Multiworld.LocationStorage.InternalToServerId(location.Id);
+        long id = Main.Multiworld.LocationStorage.InternalToServerId(location);
         _connection.Session.Locations.CompleteLocationChecksAsync(id);
+    }
+
+    /// <summary>
+    /// Sends multiple checked locations to the server
+    /// </summary>
+    public void SendMultiple(IEnumerable<string> locations)
+    {
+        if (!_connection.Connected)
+            return;
+
+        long[] ids = locations.Select(Main.Multiworld.LocationStorage.InternalToServerId).ToArray();
+        _connection.Session.Locations.CompleteLocationChecksAsync(ids);
     }
 }

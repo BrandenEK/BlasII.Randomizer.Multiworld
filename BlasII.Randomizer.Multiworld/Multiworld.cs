@@ -2,7 +2,6 @@
 using BlasII.Framework.Menus;
 using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Persistence;
-using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Displays;
 using BlasII.Randomizer.Multiworld.Models;
 using BlasII.Randomizer.Multiworld.Receivers;
@@ -94,6 +93,15 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     }
 
     /// <summary>
+    /// Send all collected locations when loading the game
+    /// </summary>
+    protected override void OnLoadGame()
+    {
+        ModLog.Warn($"Sending all {Main.Randomizer.ItemHandler.CollectedLocations.Count} locations");
+        _locationSender.SendMultiple(Main.Randomizer.ItemHandler.CollectedLocations);
+    }
+
+    /// <summary>
     /// Handles disconnect when exiting the game
     /// </summary>
     protected override void OnExitGame()
@@ -104,8 +112,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     private void OnCheckLocation(string locationId)
     {
         ModLog.Warn($"Sending location {locationId}");
-        ItemLocation location = Main.Randomizer.ItemLocationStorage[locationId];
-        _locationSender.Send(location);
+        _locationSender.Send(locationId);
     }
 
     /// <summary>
