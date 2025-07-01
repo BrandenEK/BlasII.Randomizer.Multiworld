@@ -71,7 +71,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     }
 
     /// <summary>
-    /// Simulates connecting to AP
+    /// Resets the loading flag
     /// </summary>
     protected override void OnSceneLoaded(string sceneName)
     {
@@ -79,7 +79,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     }
 
     /// <summary>
-    /// Simulates recieving items on keypress
+    /// Updates the required components
     /// </summary>
     protected override void OnUpdate()
     {
@@ -87,6 +87,14 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
         if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.End))
             _connection.Disconnect();
+    }
+
+    /// <summary>
+    /// Handles disconnect when exiting the game
+    /// </summary>
+    protected override void OnExitGame()
+    {
+        _connection.Disconnect();
     }
 
     private void OnCheckLocation(string locationId)
