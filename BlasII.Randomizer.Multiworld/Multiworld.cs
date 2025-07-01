@@ -26,6 +26,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
     private readonly ErrorReceiver _errorReceiver;
     private readonly ItemReceiver _itemReceiver;
+    private readonly SettingsReceiver _settingsReceiver;
 
     private readonly StatusDisplay _statusDisplay;
 
@@ -41,11 +42,11 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
         _errorReceiver = new ErrorReceiver();
         _itemReceiver = new ItemReceiver(_connection);
+        _settingsReceiver = new SettingsReceiver(_connection);
 
         _statusDisplay = new StatusDisplay(_connection);
 
         // TODO: Move to a separate class
-        _connection.OnConnect += TEMP_OnConnect;
         _connection.OnDisconnect += () => ModLog.Warn("Disconnected from server!!");
     }
 
@@ -152,21 +153,6 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     {
         session.Socket.ErrorReceived += _errorReceiver.OnReceiveError;
         session.Items.ItemReceived += _itemReceiver.OnReceiveItem;
-    }
-
-    private void TEMP_OnConnect(LoginResult result)
-    {
-        if (result is not LoginSuccessful success)
-            return;
-
-        // Load settings from slotdata
-        RandomizerSettings settings = ((JObject)success.SlotData["settings"]).ToObject<RandomizerSettings>();
-        settings.Seed = CalculateMultiworldSeed(_connection.Session.RoomState.Seed, _connection.ConnectionInfo.Name);
-    }
-
-    private int CalculateMultiworldSeed(string seed, string name)
-    {
-        return Math.Abs(((seed.GetHashCode() / 2) + (name.GetHashCode() / 2)) % RandomizerSettings.MAX_SEED);
     }
 
     internal static bool IGNORE_DATA_CLEAR = false;
