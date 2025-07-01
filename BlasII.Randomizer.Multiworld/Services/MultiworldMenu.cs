@@ -6,6 +6,8 @@ using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Helpers;
 using BlasII.Randomizer.Multiworld.Models;
 using Il2CppTGK.Game.Components.UI;
+using MelonLoader;
+using System.Collections;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Services;
@@ -73,6 +75,7 @@ public class MultiworldMenu : ModMenu
         _setServer.CurrentValue = info?.Server ?? string.Empty;
         _setName.CurrentValue = info?.Name ?? string.Empty;
         _setPassword.CurrentValue = info?.Password ?? string.Empty;
+        _resultText.SetText(string.Empty);
     }
 
     /// <summary>
@@ -82,7 +85,7 @@ public class MultiworldMenu : ModMenu
     {
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            StartConnectProcess();
+            MelonCoroutines.Start(Connect());
         }
         else if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -98,8 +101,13 @@ public class MultiworldMenu : ModMenu
         Multiworld.IGNORE_DATA_CLEAR = true;
     }
 
-    private void StartConnectProcess()
+    private IEnumerator Connect()
     {
+        DisplayResult(Main.Multiworld.LocalizationHandler.Localize("result/connect"), RESULT_INFO, 0);
+
+        yield return null;
+        yield return null;
+
         var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
         _connection.Connect(info);
     }
@@ -108,16 +116,24 @@ public class MultiworldMenu : ModMenu
     {
         if (result is LoginFailure failure)
         {
-            // TODO: Display failure in menu
-            ModLog.Error("Faulure;");
+            string text = $"{Main.Multiworld.LocalizationHandler.Localize("result/fail")} {string.Join(", ", failure.Errors)}";
+            DisplayResult(text, RESULT_ERROR, 5);
             return;
         }
 
-        if (result is LoginSuccessful success)
+        if (result is LoginSuccessful)
         {
             _menuMod.ShowNextMenu();
             return;
         }
+    }
+
+    private void DisplayResult(string message, Color32 color, float time)
+    {
+        _resultText.SetText(message);
+        _resultText.SetColor(color);
+
+        // Start timer
     }
 
     private TextOption _setServer;
@@ -128,4 +144,6 @@ public class MultiworldMenu : ModMenu
     private const int TEXT_SIZE = 56;
     private readonly Color32 SILVER = new Color32(192, 192, 192, 255);
     private readonly Color32 YELLOW = new Color32(255, 231, 65, 255);
+    private readonly Color32 RESULT_INFO = new Color32(255, 211, 1, 255);
+    private readonly Color32 RESULT_ERROR = new Color32(214, 31, 31, 255);
 }
