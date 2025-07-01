@@ -3,6 +3,7 @@ using BlasII.Framework.Menus;
 using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Persistence;
 using BlasII.Randomizer.Models;
+using BlasII.Randomizer.Multiworld.Displays;
 using BlasII.Randomizer.Multiworld.Models;
 using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
@@ -26,6 +27,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     private readonly ErrorReceiver _errorReceiver;
     private readonly ItemReceiver _itemReceiver;
 
+    private readonly StatusDisplay _statusDisplay;
+
     internal IconStorage IconStorage { get; private set; }
     internal IdStorage ItemStorage { get; private set; }
     internal IdStorage LocationStorage { get; private set; }
@@ -38,6 +41,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
         _errorReceiver = new ErrorReceiver();
         _itemReceiver = new ItemReceiver(_connection);
+
+        _statusDisplay = new StatusDisplay(_connection);
 
         // TODO: Move to a separate class
         _connection.OnConnect += TEMP_OnConnect;
@@ -84,9 +89,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     protected override void OnUpdate()
     {
         _itemReceiver.OnUpdate();
-
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.End))
-            _connection.Disconnect();
+        _statusDisplay.OnUpdate();
     }
 
     /// <summary>
