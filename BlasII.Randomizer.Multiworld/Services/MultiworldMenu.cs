@@ -20,6 +20,8 @@ public class MultiworldMenu : ModMenu
     private readonly ServerConnection _connection;
     private readonly MenuFramework _menuMod;
 
+    private object _resultCoroutine = null;
+
     /// <summary>
     /// Maximum priority
     /// </summary>
@@ -130,10 +132,20 @@ public class MultiworldMenu : ModMenu
 
     private void DisplayResult(string message, Color32 color, float time)
     {
+        if (_resultCoroutine != null)
+            MelonCoroutines.Stop(_resultCoroutine);
+
         _resultText.SetText(message);
         _resultText.SetColor(color);
 
-        // Start timer
+        if (time > 0)
+            _resultCoroutine = MelonCoroutines.Start(HideResult(time));
+    }
+
+    private IEnumerator HideResult(float time)
+    {
+        yield return new WaitForSecondsRealtime(time);
+        _resultText.SetText(string.Empty);
     }
 
     private TextOption _setServer;
@@ -144,6 +156,6 @@ public class MultiworldMenu : ModMenu
     private const int TEXT_SIZE = 56;
     private readonly Color32 SILVER = new Color32(192, 192, 192, 255);
     private readonly Color32 YELLOW = new Color32(255, 231, 65, 255);
-    private readonly Color32 RESULT_INFO = new Color32(255, 211, 1, 255);
+    private readonly Color32 RESULT_INFO = new Color32(0, 107, 61, 255);
     private readonly Color32 RESULT_ERROR = new Color32(214, 31, 31, 255);
 }
