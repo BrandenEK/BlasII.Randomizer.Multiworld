@@ -85,7 +85,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     {
         _itemReceiver.OnUpdate();
 
-        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Alpha0))
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.End))
             _connection.Disconnect();
     }
 
