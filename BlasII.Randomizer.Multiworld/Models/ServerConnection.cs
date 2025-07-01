@@ -13,6 +13,9 @@ public class ServerConnection
     /// <summary> The session object </summary>
     public ArchipelagoSession Session { get; private set; }
 
+    /// <summary> The details of the current connection </summary>
+    public ConnectionInfo ConnectionInfo { get; set; }
+
     /// <summary> Whether the server is connected </summary>
     public bool Connected => Session is not null && Session.Socket.Connected;
 
@@ -48,6 +51,7 @@ public class ServerConnection
         }
 
         ModLog.Info("Connection result: " + result.Successful);
+        ConnectionInfo = info;
         OnConnect?.Invoke(result);
     }
 }
