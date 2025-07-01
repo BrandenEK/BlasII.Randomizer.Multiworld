@@ -9,8 +9,6 @@ using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
 using BlasII.Randomizer.Multiworld.Services;
 using BlasII.Randomizer.Multiworld.Storages;
-using Newtonsoft.Json.Linq;
-using System;
 
 namespace BlasII.Randomizer.Multiworld;
 
@@ -22,6 +20,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     // Hopefully dont need this in the future
     private readonly ServerConnection _connection = new();
 
+    private readonly GoalSender _goalSender;
     private readonly LocationSender _locationSender;
 
     private readonly ErrorReceiver _errorReceiver;
@@ -38,6 +37,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION)
     {
+        _goalSender = new GoalSender(_connection);
         _locationSender = new LocationSender(_connection);
 
         _errorReceiver = new ErrorReceiver();
