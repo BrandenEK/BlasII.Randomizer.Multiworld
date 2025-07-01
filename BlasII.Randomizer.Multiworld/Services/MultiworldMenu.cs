@@ -62,7 +62,6 @@ public class MultiworldMenu : ModMenu
         }).AddText(new TextCreationOptions()
         {
             FontSize = 56,
-            Contents = "Really long result text that could possibly occur for big errors"
         }).AddShadow();
     }
 
