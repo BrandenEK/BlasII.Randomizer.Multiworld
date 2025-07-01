@@ -34,19 +34,21 @@ public class StatusDisplay
             return;
 
         if (_image == null)
-            _image = CreateImage(Object.FindObjectOfType<UITearsControl>().transform);
+            _image = CreateImage();
 
         if (_image == null)
-        {
-            ModLog.Error("Failed to create the connection status image");
             return;
-        }
 
         _image.sprite = Main.Multiworld.IconStorage.GetConnectionIcon(_connection.Connected);
     }
 
-    private Image CreateImage(Transform parent)
+    private Image CreateImage()
     {
+        Transform parent = Object.FindObjectOfType<UITearsControl>()?.transform;
+
+        if (parent == null)
+            return null;
+
         RectTransform connect = UIModder.Create(new RectCreationOptions()
         {
             Name = "Connection",
