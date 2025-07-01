@@ -136,47 +136,61 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     }
 
     /// <summary>
-    /// Attempts to connect to the AP server
+    /// Adds the required receiver callbacks to the session
     /// </summary>
-    public void Connect(ConnectionInfo info)
+    public void SetReceiverCallbacks(ArchipelagoSession session)
     {
-        ArchipelagoSession session;
-        LoginResult result;
-        ModLog.Info($"Attempting with {info}");
-
-        try
-        {
-            session = ArchipelagoSessionFactory.CreateSession(info.Server);
-            session.Socket.ErrorReceived += _errorReceiver.OnReceiveError;
-            session.Items.ItemReceived += _itemReceiver.OnReceiveItem;
-            _connection.UpdateSession(session);
-
-            result = session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
-        }
-        catch (Exception ex)
-        {
-            result = new LoginFailure(ex.ToString());
-            CurrentConnection = null;
-
-            // temp
-            ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
-            return;
-        }
-
-        bool connected = result.Successful;
-        ModLog.Info("Connection result: " + connected);
-        _connection.InvokeConnect(result);
-        CurrentConnection = info;
-
-        // Should I not return here if not successful ???
-
-        // parse slot data
-        LoginSuccessful success = result as LoginSuccessful;
-
-        // Load settings from slotdata
-        RandomizerSettings settings = ((JObject)success.SlotData["settings"]).ToObject<RandomizerSettings>();
-        settings.Seed = CalculateMultiworldSeed(session.RoomState.Seed, info.Name);
+        session.Socket.ErrorReceived += _errorReceiver.OnReceiveError;
+        session.Items.ItemReceived += _itemReceiver.OnReceiveItem;
     }
+
+    private void COnnect()
+    {
+        // set connection info
+        // call connect on the server
+        // set receiver callbacks
+    }
+
+    ///// <summary>
+    ///// Attempts to connect to the AP server
+    ///// </summary>
+    //public void Connect(ConnectionInfo info)
+    //{
+    //    ArchipelagoSession session;
+    //    LoginResult result;
+    //    ModLog.Info($"Attempting with {info}");
+
+    //    try
+    //    {
+    //        session = ArchipelagoSessionFactory.CreateSession(info.Server);
+    //        _connection.UpdateSession(session);
+
+    //        result = session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        result = new LoginFailure(ex.ToString());
+    //        CurrentConnection = null;
+
+    //        // temp
+    //        ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
+    //        return;
+    //    }
+
+    //    bool connected = result.Successful;
+    //    ModLog.Info("Connection result: " + connected);
+    //    _connection.InvokeConnect(result);
+    //    CurrentConnection = info;
+
+    //    // Should I not return here if not successful ???
+
+    //    // parse slot data
+    //    LoginSuccessful success = result as LoginSuccessful;
+
+    //    // Load settings from slotdata
+    //    RandomizerSettings settings = ((JObject)success.SlotData["settings"]).ToObject<RandomizerSettings>();
+    //    settings.Seed = CalculateMultiworldSeed(session.RoomState.Seed, info.Name);
+    //}
 
     private int CalculateMultiworldSeed(string seed, string name)
     {

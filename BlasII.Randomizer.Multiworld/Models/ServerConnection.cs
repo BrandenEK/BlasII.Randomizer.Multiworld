@@ -1,4 +1,7 @@
 ﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using BlasII.ModdingAPI;
+using System;
 
 namespace BlasII.Randomizer.Multiworld.Models;
 
@@ -28,10 +31,31 @@ public class ServerConnection
     }
 
     /// <summary>
-    /// Replaces the current session object with a new one
+    /// Attempts to connect to the AP server
     /// </summary>
-    public void UpdateSession(ArchipelagoSession session)
+    public void Connect(ConnectionInfo info)
     {
-        Session = session;
+        LoginResult result;
+        ModLog.Info($"Attempting with {info}");
+
+        try
+        {
+            ArchipelagoSession session = ArchipelagoSessionFactory.CreateSession(info.Server);
+            Main.Multiworld.SetReceiverCallbacks(session);
+
+            result = session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
+            Session = session;
+        }
+        catch (Exception ex)
+        {
+            result = new LoginFailure(ex.ToString());
+            Session = null;
+
+            // TODO: Better error display
+            ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
+        }
+
+        ModLog.Info("Connection result: " + result.Successful);
+        OnConnect?.Invoke(result);
     }
 }

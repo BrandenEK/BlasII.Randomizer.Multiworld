@@ -87,7 +87,11 @@ public class MultiworldMenu : ModMenu
     private void StartConnectProcess()
     {
         var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
-        Main.Multiworld.Connect(info);
+
+        Main.Multiworld.CurrentConnection = info;
+        _connection.Connect(info);
+
+        //Main.Multiworld.Connect(info);
     }
 
     private void OnConnect(LoginResult result)
