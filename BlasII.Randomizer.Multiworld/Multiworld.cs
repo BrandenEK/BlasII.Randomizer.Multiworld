@@ -11,6 +11,7 @@ using BlasII.Randomizer.Multiworld.Services;
 using BlasII.Randomizer.Multiworld.Storages;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 
 namespace BlasII.Randomizer.Multiworld;
 
@@ -91,6 +92,17 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     {
         _itemReceiver.OnUpdate();
         _statusDisplay.OnUpdate();
+    }
+
+    /// <summary>
+    /// Send all collected locations when loading the game
+    /// </summary>
+    protected override void OnLoadGame()
+    {
+        var locations = Main.Randomizer.ItemHandler.CollectedLocations.Select(x => Main.Randomizer.ItemLocationStorage[x]);
+
+        ModLog.Warn($"Sending all {locations.Count()} locations");
+        _locationSender.SendMultiple(locations);
     }
 
     /// <summary>
