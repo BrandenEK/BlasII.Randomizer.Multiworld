@@ -10,7 +10,7 @@ namespace BlasII.Randomizer.Multiworld.Storages;
 public class IconStorage
 {
     private readonly Sprite _itemSprite;
-    private readonly Sprite[] _connectSprites;
+    private readonly Sprite[] _statusSprites;
 
     /// <summary>
     /// Loads all required icons
@@ -20,8 +20,8 @@ public class IconStorage
         ModLog.Info("Loading multiworld item icon");
         file.LoadDataAsSprite("mwitem.png", out _itemSprite);
 
-        ModLog.Info("Loading multiworld connection icons");
-        file.LoadDataAsFixedSpritesheet("mwconnection.png", new Vector2(30, 30), out _connectSprites);
+        ModLog.Info("Loading multiworld status icons");
+        file.LoadDataAsFixedSpritesheet("mwstatus.png", new Vector2(32, 32), out _statusSprites);
     }
 
     /// <summary>
@@ -35,8 +35,8 @@ public class IconStorage
     /// <summary>
     /// Gets the connected or disconnected icon
     /// </summary>
-    public Sprite GetConnectionIcon(bool connected)
+    public Sprite GetStatusIcon(bool status)
     {
-        return _connectSprites[connected ? 0 : 1];
+        return _statusSprites[status ? 0 : 1];
     }
 }

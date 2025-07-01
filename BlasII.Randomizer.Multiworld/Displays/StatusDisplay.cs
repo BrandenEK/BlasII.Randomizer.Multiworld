@@ -1,5 +1,4 @@
 ﻿using BlasII.Framework.UI;
-using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Helpers;
 using BlasII.Randomizer.Multiworld.Models;
 using Il2Cpp;
@@ -39,7 +38,7 @@ public class StatusDisplay
         if (_image == null)
             return;
 
-        _image.sprite = Main.Multiworld.IconStorage.GetConnectionIcon(_connection.Connected);
+        _image.sprite = Main.Multiworld.IconStorage.GetStatusIcon(_connection.Connected);
     }
 
     private Image CreateImage()
@@ -51,7 +50,7 @@ public class StatusDisplay
 
         RectTransform connect = UIModder.Create(new RectCreationOptions()
         {
-            Name = "Connection",
+            Name = "mwstatus",
             Parent = parent,
             Pivot = Vector2.one,
             XRange = Vector2.one,
