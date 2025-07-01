@@ -4,6 +4,8 @@ lang: en
 option/server: Server IP:
 option/name: Player name:
 option/password: Password:
+result/connect: Attempting to connect...
+result/fail: Failed to connect:
 
 # Items
 item/given: Received
