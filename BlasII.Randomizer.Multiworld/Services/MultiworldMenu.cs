@@ -5,7 +5,7 @@ using BlasII.Framework.UI;
 using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Helpers;
 using BlasII.Randomizer.Multiworld.Models;
-using Il2CppTMPro;
+using Il2CppTGK.Game.Components.UI;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Services;
@@ -50,7 +50,16 @@ public class MultiworldMenu : ModMenu
         _setName = text.CreateOption("name", ui, new Vector2(0, 0), "option/name", false, true, 64);
         _setPassword = text.CreateOption("password", ui, new Vector2(0, -150), "option/password", false, true, 64);
 
-        _resultText = UIModder.Create()
+        _resultText = UIModder.Create(new RectCreationOptions()
+        {
+            Name = "resulttext",
+            Parent = ui,
+            Position = new Vector2(0, -280),
+        }).AddText(new TextCreationOptions()
+        {
+            FontSize = 56,
+            Contents = "Really long result text that could possibly occur for big errors"
+        }).AddShadow();
     }
 
     /// <summary>
@@ -114,7 +123,7 @@ public class MultiworldMenu : ModMenu
     private TextOption _setServer;
     private TextOption _setName;
     private TextOption _setPassword;
-    private TMP_Text _resultText;
+    private UIPixelTextWithShadow _resultText;
 
     private const int TEXT_SIZE = 56;
     private readonly Color32 SILVER = new Color32(192, 192, 192, 255);
