@@ -41,6 +41,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
         // TODO: Move to a separate class
         _connection.OnConnect += TEMP_OnConnect;
+        _connection.OnDisconnect += () => ModLog.Warn("Disconnected from server!!");
     }
 
     /// <summary>
@@ -83,6 +84,9 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     protected override void OnUpdate()
     {
         _itemReceiver.OnUpdate();
+
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.Alpha0))
+            _connection.Disconnect();
     }
 
     private void OnCheckLocation(string locationId)

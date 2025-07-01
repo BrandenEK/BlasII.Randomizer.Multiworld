@@ -11,10 +11,10 @@ namespace BlasII.Randomizer.Multiworld.Models;
 public class ServerConnection
 {
     /// <summary> The session object </summary>
-    public ArchipelagoSession Session { get; private set; }
+    public ArchipelagoSession Session { get; private set; } = ArchipelagoSessionFactory.CreateSession("localhost");
 
     /// <summary> The details of the current connection </summary>
-    public ConnectionInfo ConnectionInfo { get; set; }
+    public ConnectionInfo ConnectionInfo { get; set; } = new ConnectionInfo(string.Empty, string.Empty, string.Empty);
 
     /// <summary> Whether the server is connected </summary>
     public bool Connected => Session is not null && Session.Socket.Connected;
@@ -25,15 +25,15 @@ public class ServerConnection
     public void Connect(ConnectionInfo info)
     {
         LoginResult result;
-        ModLog.Info($"Attempting with {info}");
+        ModLog.Info($"Calling connect with {info}");
 
         try
         {
-            ArchipelagoSession session = ArchipelagoSessionFactory.CreateSession(info.Server);
-            Main.Multiworld.SetReceiverCallbacks(session);
+            Session = ArchipelagoSessionFactory.CreateSession(info.Server);
+            Main.Multiworld.SetReceiverCallbacks(Session);
+            Session.Socket.SocketClosed += (_) => OnDisconnect?.Invoke();
 
-            result = session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
-            Session = session;
+            result = Session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
         }
         catch (Exception ex)
         {
@@ -41,12 +41,20 @@ public class ServerConnection
             ModLog.Error($"Error on connection: {string.Join(", ", failure.Errors)}");
 
             result = failure;
-            Session = null;
         }
 
         ModLog.Info("Connection result: " + result.Successful);
         ConnectionInfo = info;
         OnConnect?.Invoke(result);
+    }
+
+    /// <summary>
+    /// Attempts to disconnect from the AP server
+    /// </summary>
+    public void Disconnect()
+    {
+        ModLog.Info("Calling disconnect");
+        Session.Socket.DisconnectAsync();
     }
 
     /// <summary>
