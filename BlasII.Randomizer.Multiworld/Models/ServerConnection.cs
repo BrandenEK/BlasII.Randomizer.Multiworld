@@ -19,12 +19,6 @@ public class ServerConnection
     /// <summary> Whether the server is connected </summary>
     public bool Connected => Session is not null && Session.Socket.Connected;
 
-    public delegate void ConnectDelegate(LoginResult result);
-    //public delegate void DisconnectDelegate();
-
-    public event ConnectDelegate OnConnect;
-    //public event DisconnectDelegate OnDisconnect;
-
     /// <summary>
     /// Attempts to connect to the AP server
     /// </summary>
@@ -54,4 +48,24 @@ public class ServerConnection
         ConnectionInfo = info;
         OnConnect?.Invoke(result);
     }
+
+    /// <summary>
+    /// Delegate for handling connect events
+    /// </summary>
+    public delegate void ConnectDelegate(LoginResult result);
+    
+    /// <summary>
+    /// Called after connecting to the server
+    /// </summary>
+    public event ConnectDelegate OnConnect;
+
+    /// <summary>
+    /// Delegate for handling disconnect events
+    /// </summary>
+    public delegate void DisconnectDelegate();
+
+    /// <summary>
+    /// Called after disconnecting from the server
+    /// </summary>
+    public event DisconnectDelegate OnDisconnect;
 }
