@@ -17,7 +17,7 @@ public class ServerConnection
     public ConnectionInfo ConnectionInfo { get; set; } = new ConnectionInfo(string.Empty, string.Empty, string.Empty);
 
     /// <summary> Whether the server is connected </summary>
-    public bool Connected => Session is not null && Session.Socket.Connected;
+    public bool Connected => Session.Socket.Connected;
 
     /// <summary>
     /// Attempts to connect to the AP server
