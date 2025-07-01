@@ -9,6 +9,7 @@ using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
 using BlasII.Randomizer.Multiworld.Services;
 using BlasII.Randomizer.Multiworld.Storages;
+using Il2CppTGK.Game;
 
 namespace BlasII.Randomizer.Multiworld;
 
@@ -99,6 +100,14 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     protected override void OnExitGame()
     {
         _connection.Disconnect();
+    }
+
+    /// <summary>
+    /// Possibly sends a goal when the final boss is defeated
+    /// </summary>
+    public void OnDefeatFinalBoss(int ending)
+    {
+        _goalSender.CheckAndSendGoal(ending);
     }
 
     private void OnCheckLocation(string locationId)

@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
+using BlasII.ModdingAPI;
 using BlasII.Randomizer.Multiworld.Models;
 
 namespace BlasII.Randomizer.Multiworld.Senders;
@@ -30,5 +31,16 @@ public class GoalSender
         var packet = new StatusUpdatePacket();
         packet.Status = ArchipelagoClientState.ClientGoal;
         _connection.Session.Socket.SendPacket(packet);
+    }
+
+    /// <summary>
+    /// Checks the completed ending and potentially sends a goal packet
+    /// </summary>
+    public void CheckAndSendGoal(int ending)
+    {
+        ModLog.Info($"Checking completed goal ({ending}) against chosen goal (0)");
+
+        if (ending >= 0)
+            SendGoal();
     }
 }
