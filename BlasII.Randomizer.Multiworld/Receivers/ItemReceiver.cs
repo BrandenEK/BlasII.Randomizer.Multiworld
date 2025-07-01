@@ -28,6 +28,7 @@ public class ItemReceiver
     public ItemReceiver(ServerConnection connection)
     {
         _connection = connection;
+        _connection.OnDisconnect += ClearQueue;
     }
 
     /// <summary>
@@ -54,6 +55,14 @@ public class ItemReceiver
         lock (ITEM_LOCK)
         {
             ProcessQueue();
+        }
+    }
+
+    private void ClearQueue()
+    {
+        lock (ITEM_LOCK)
+        {
+            _itemQueue.Clear();
         }
     }
 

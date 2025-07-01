@@ -23,6 +23,9 @@ public class LocationSender
     /// </summary>
     public void Send(ItemLocation location)
     {
+        if (!_connection.Connected)
+            return;
+
         long id = Main.Multiworld.LocationStorage.InternalToServerId(location.Id);
         _connection.Session.Locations.CompleteLocationChecksAsync(id);
     }

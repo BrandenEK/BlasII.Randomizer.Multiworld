@@ -1,5 +1,4 @@
 ﻿using Archipelago.MultiClient.Net;
-using Archipelago.MultiClient.Net.Enums;
 using BlasII.Framework.Menus;
 using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Persistence;
@@ -33,17 +32,16 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 
     internal Scouter Scouter { get; private set; }
 
-    /// <summary>
-    /// The current connection details
-    /// </summary>
-    public ConnectionInfo CurrentConnection { get; set; } = null;
-
     internal Multiworld() : base(ModInfo.MOD_ID, ModInfo.MOD_NAME, ModInfo.MOD_AUTHOR, ModInfo.MOD_VERSION)
     {
         _locationSender = new LocationSender(_connection);
 
         _errorReceiver = new ErrorReceiver();
         _itemReceiver = new ItemReceiver(_connection);
+
+        // TODO: Move to a separate class
+        _connection.OnConnect += TEMP_OnConnect;
+        _connection.OnDisconnect += () => ModLog.Warn("Disconnected from server!!");
     }
 
     /// <summary>
@@ -73,21 +71,30 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     }
 
     /// <summary>
-    /// Simulates connecting to AP
+    /// Resets the loading flag
     /// </summary>
     protected override void OnSceneLoaded(string sceneName)
     {
-        //if (!_connection.Connected)
-        //    Connect("localhost", "B", null);
         IGNORE_DATA_CLEAR = false;
     }
 
     /// <summary>
-    /// Simulates recieving items on keypress
+    /// Updates the required components
     /// </summary>
     protected override void OnUpdate()
     {
         _itemReceiver.OnUpdate();
+
+        if (UnityEngine.Input.GetKeyDown(UnityEngine.KeyCode.End))
+            _connection.Disconnect();
+    }
+
+    /// <summary>
+    /// Handles disconnect when exiting the game
+    /// </summary>
+    protected override void OnExitGame()
+    {
+        _connection.Disconnect();
     }
 
     private void OnCheckLocation(string locationId)
@@ -104,7 +111,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     {
         return new MultiworldSlotData()
         {
-            connection = CurrentConnection,
+            connection = _connection.ConnectionInfo,
             itemsReceived = _itemReceiver.ItemsReceived,
         };
     }
@@ -118,7 +125,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
         if (IGNORE_DATA_CLEAR)
             return;
 
-        CurrentConnection = data.connection;
+        _connection.ConnectionInfo = data.connection;
         _itemReceiver.ItemsReceived = data.itemsReceived;
     }
 
@@ -131,51 +138,27 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
         if (IGNORE_DATA_CLEAR)
             return;
 
-        CurrentConnection = null;
+        _connection.ConnectionInfo = null;
         _itemReceiver.ItemsReceived = 0;
     }
 
     /// <summary>
-    /// Attempts to connect to the AP server
+    /// Adds the required receiver callbacks to the session
     /// </summary>
-    public void Connect(ConnectionInfo info)
+    public void SetReceiverCallbacks(ArchipelagoSession session)
     {
-        ArchipelagoSession session;
-        LoginResult result;
-        ModLog.Info($"Attempting with {info}");
+        session.Socket.ErrorReceived += _errorReceiver.OnReceiveError;
+        session.Items.ItemReceived += _itemReceiver.OnReceiveItem;
+    }
 
-        try
-        {
-            session = ArchipelagoSessionFactory.CreateSession(info.Server);
-            session.Socket.ErrorReceived += _errorReceiver.OnReceiveError;
-            session.Items.ItemReceived += _itemReceiver.OnReceiveItem;
-            _connection.UpdateSession(session);
-
-            result = session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
-        }
-        catch (Exception ex)
-        {
-            result = new LoginFailure(ex.ToString());
-            CurrentConnection = null;
-
-            // temp
-            ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
+    private void TEMP_OnConnect(LoginResult result)
+    {
+        if (result is not LoginSuccessful success)
             return;
-        }
-
-        bool connected = result.Successful;
-        ModLog.Info("Connection result: " + connected);
-        _connection.InvokeConnect(result);
-        CurrentConnection = info;
-
-        // Should I not return here if not successful ???
-
-        // parse slot data
-        LoginSuccessful success = result as LoginSuccessful;
 
         // Load settings from slotdata
         RandomizerSettings settings = ((JObject)success.SlotData["settings"]).ToObject<RandomizerSettings>();
-        settings.Seed = CalculateMultiworldSeed(session.RoomState.Seed, info.Name);
+        settings.Seed = CalculateMultiworldSeed(_connection.Session.RoomState.Seed, _connection.ConnectionInfo.Name);
     }
 
     private int CalculateMultiworldSeed(string seed, string name)

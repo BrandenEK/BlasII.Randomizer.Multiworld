@@ -55,7 +55,7 @@ public class MultiworldMenu : ModMenu
     /// </summary>
     public override void OnStart()
     {
-        ConnectionInfo info = Main.Multiworld.CurrentConnection;
+        ConnectionInfo info = _connection.ConnectionInfo;
         ModLog.Info($"Starting menu with {info?.ToString() ?? "nothing"}");
 
         _setServer.CurrentValue = info?.Server ?? string.Empty;
@@ -87,7 +87,7 @@ public class MultiworldMenu : ModMenu
     private void StartConnectProcess()
     {
         var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
-        Main.Multiworld.Connect(info);
+        _connection.Connect(info);
     }
 
     private void OnConnect(LoginResult result)
