@@ -1,12 +1,9 @@
 ﻿using Archipelago.MultiClient.Net;
-using Archipelago.MultiClient.Net.Enums;
-using Archipelago.MultiClient.Net.Models;
 using BlasII.Framework.Menus;
 using BlasII.Framework.Menus.Options;
 using BlasII.ModdingAPI;
+using BlasII.ModdingAPI.Helpers;
 using BlasII.Randomizer.Multiworld.Models;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Services;
@@ -17,6 +14,7 @@ namespace BlasII.Randomizer.Multiworld.Services;
 public class MultiworldMenu : ModMenu
 {
     private readonly ServerConnection _connection;
+    private readonly MenuFramework _menuMod;
 
     /// <summary>
     /// Maximum priority
@@ -30,6 +28,7 @@ public class MultiworldMenu : ModMenu
     {
         _connection = connection;
         _connection.OnConnect += OnConnect;
+        _menuMod = (MenuFramework)ModHelper.GetModById("BlasII.Framework.Menus");
     }
 
     /// <summary>
@@ -63,13 +62,18 @@ public class MultiworldMenu : ModMenu
         _setPassword.CurrentValue = info?.Password ?? string.Empty;
     }
 
+    /// <summary>
+    /// Overrides the 'enter' key to start connect process
+    /// </summary>
     public override void OnUpdate()
     {
-        base.OnUpdate();
-
-        if (UnityEngine.Input.GetKeyDown(KeyCode.Delete))
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
             StartConnectProcess();
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            _menuMod.ShowPreviousMenu();
         }
     }
 
@@ -78,9 +82,6 @@ public class MultiworldMenu : ModMenu
     /// </summary>
     public override void OnFinish()
     {
-        // Validate connected first
-
-
         Multiworld.IGNORE_DATA_CLEAR = true;
     }
 
@@ -101,7 +102,8 @@ public class MultiworldMenu : ModMenu
 
         if (result is LoginSuccessful success)
         {
-            // TODO: finish the menu
+            _menuMod.ShowNextMenu();
+            return;
         }
     }
 
