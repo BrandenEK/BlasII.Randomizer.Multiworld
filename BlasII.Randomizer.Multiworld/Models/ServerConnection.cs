@@ -23,14 +23,6 @@ public class ServerConnection
     //public event DisconnectDelegate OnDisconnect;
 
     /// <summary>
-    /// Invokes the OnConnect event
-    /// </summary>
-    public void InvokeConnect(LoginResult result)
-    {
-        OnConnect?.Invoke(result);
-    }
-
-    /// <summary>
     /// Attempts to connect to the AP server
     /// </summary>
     public void Connect(ConnectionInfo info)
@@ -48,11 +40,11 @@ public class ServerConnection
         }
         catch (Exception ex)
         {
-            result = new LoginFailure(ex.ToString());
-            Session = null;
+            var failure = new LoginFailure(ex.ToString());
+            ModLog.Error($"Error on connection: {string.Join(", ", failure.Errors)}");
 
-            // TODO: Better error display
-            ModLog.Warn(string.Join(", ", ((LoginFailure)result).Errors));
+            result = failure;
+            Session = null;
         }
 
         ModLog.Info("Connection result: " + result.Successful);
