@@ -11,8 +11,8 @@ public class ErrorReceiver
     /// <summary>
     /// Displays the formatted error
     /// </summary>
-    public void OnReceiveError(Exception ex, string message)
+    public void OnReceiveError(Exception ex, string _)
     {
-        ModLog.Error($"Received socket error ({message}): {ex}");
+        ModLog.Error($"Received socket error: {ex}");
     }
 }
