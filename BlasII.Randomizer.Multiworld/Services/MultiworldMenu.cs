@@ -87,12 +87,23 @@ public class MultiworldMenu : ModMenu
     {
         if (Main.Multiworld.InputHandler.GetButtonDown(ButtonType.UIConfirm))
         {
-            MelonCoroutines.Start(Connect());
+            OnPressEnter();
         }
         else if (Main.Multiworld.InputHandler.GetButtonDown(ButtonType.UICancel))
         {
             _menuMod.ShowPreviousMenu();
         }
+    }
+
+    private void OnPressEnter()
+    {
+#if DEBUG
+        bool skipConnect = Input.GetKey(KeyCode.LeftShift);
+#else
+        bool skipConnect = false;
+#endif
+
+        MelonCoroutines.Start(skipConnect ? FakeConnect() : Connect());
     }
 
     /// <summary>
@@ -110,8 +121,30 @@ public class MultiworldMenu : ModMenu
         yield return null;
         yield return null;
 
+        try
+        {
+            var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
+            _connection.Connect(info);
+        }
+        catch (System.Exception ex)
+        {
+            ModLog.Error($"Exception caught while attempting to connect: {ex}");
+            string text = $"{Main.Multiworld.LocalizationHandler.Localize("result/fail")} {ex.Message}";
+            DisplayResult(text, RESULT_ERROR, 5);
+        }
+    }
+
+    private IEnumerator FakeConnect()
+    {
+        ModLog.Warn("Skipping connection");
+        DisplayResult(Main.Multiworld.LocalizationHandler.Localize("result/skip"), RESULT_INFO, 0);
+
         var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
-        _connection.Connect(info);
+        _connection.ConnectionInfo = info;
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        _menuMod.ShowNextMenu();
     }
 
     private void OnConnect(LoginResult result)
