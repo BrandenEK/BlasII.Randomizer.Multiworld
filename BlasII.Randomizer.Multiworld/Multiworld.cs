@@ -9,7 +9,6 @@ using BlasII.Randomizer.Multiworld.Receivers;
 using BlasII.Randomizer.Multiworld.Senders;
 using BlasII.Randomizer.Multiworld.Services;
 using BlasII.Randomizer.Multiworld.Storages;
-using Il2CppTGK.Game;
 
 namespace BlasII.Randomizer.Multiworld;
 

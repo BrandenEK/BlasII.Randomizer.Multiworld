@@ -1,4 +1,5 @@
-﻿using Archipelago.MultiClient.Net.Enums;
+﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
 using BlasII.ModdingAPI;
 using BlasII.Randomizer.Multiworld.Models;
@@ -12,12 +13,26 @@ public class GoalSender
 {
     private readonly ServerConnection _connection;
 
+    private int _chosenEnding;
+
     /// <summary>
     /// Initializes a new GoalSender
     /// </summary>
     public GoalSender(ServerConnection connection)
     {
         _connection = connection;
+        _connection.OnConnect += OnConnect;
+    }
+
+    private void OnConnect(LoginResult result)
+    {
+        _chosenEnding = 0;
+
+        if (result is not LoginSuccessful success)
+            return;
+
+        _chosenEnding = int.Parse(success.SlotData["ending"].ToString());
+        ModLog.Info($"Received chosen ending ({_chosenEnding}) from slot data");
     }
 
     /// <summary>
@@ -38,9 +53,9 @@ public class GoalSender
     /// </summary>
     public void CheckAndSendGoal(int ending)
     {
-        ModLog.Info($"Checking completed goal ({ending}) against chosen goal (0)");
+        ModLog.Info($"Checking completed goal ({ending}) against chosen goal ({_chosenEnding})");
 
-        if (ending >= 0)
+        if (ending >= _chosenEnding)
             SendGoal();
     }
 }
