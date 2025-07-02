@@ -19,6 +19,8 @@ public class ServerConnection
     /// <summary> Whether the server is connected </summary>
     public bool Connected => Session.Socket.Connected;
 
+    private bool _wasConnected;
+
     /// <summary>
     /// Attempts to connect to the AP server
     /// </summary>
@@ -31,7 +33,6 @@ public class ServerConnection
         {
             Session = ArchipelagoSessionFactory.CreateSession(info.Server);
             Main.Multiworld.SetReceiverCallbacks(Session);
-            Session.Socket.SocketClosed += (_) => OnDisconnect?.Invoke();
 
             result = Session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
         }
@@ -55,6 +56,20 @@ public class ServerConnection
     {
         ModLog.Info("Calling disconnect");
         Session.Socket.DisconnectAsync();
+    }
+
+    /// <summary>
+    /// Called every frame to check if 'Connected' has changed
+    /// </summary>
+    public void CheckStatus()
+    {
+        bool isConnected = Connected;
+        if (_wasConnected && !isConnected)
+        {
+            OnDisconnect?.Invoke();
+        }
+
+        _wasConnected = isConnected;
     }
 
     /// <summary>

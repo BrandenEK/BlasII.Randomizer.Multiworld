@@ -86,8 +86,9 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     /// </summary>
     protected override void OnUpdate()
     {
+        _connection.CheckStatus();
+
         _itemReceiver.OnUpdate();
-        _disconnectDisplay.OnUpdate();
         _statusDisplay.OnUpdate();
     }
 
