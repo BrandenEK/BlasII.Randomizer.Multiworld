@@ -110,8 +110,17 @@ public class MultiworldMenu : ModMenu
         yield return null;
         yield return null;
 
-        var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
-        _connection.Connect(info);
+        try
+        {
+            var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
+            _connection.Connect(info);
+        }
+        catch (System.Exception ex)
+        {
+            ModLog.Error($"Exception caught while attempting to connect: {ex}");
+            string text = $"{Main.Multiworld.LocalizationHandler.Localize("result/fail")} {ex.Message}";
+            DisplayResult(text, RESULT_ERROR, 5);
+        }
     }
 
     private void OnConnect(LoginResult result)

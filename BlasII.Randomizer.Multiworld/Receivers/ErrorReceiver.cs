@@ -13,7 +13,6 @@ public class ErrorReceiver
     /// </summary>
     public void OnReceiveError(Exception ex, string message)
     {
-        ModLog.Error($"Received socket error: {message}");
-        ModLog.Error(ex);
+        ModLog.Error($"Received socket error ({message}): {ex}");
     }
 }
