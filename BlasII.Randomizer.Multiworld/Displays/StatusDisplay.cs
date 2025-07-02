@@ -56,7 +56,7 @@ public class StatusDisplay
             XRange = Vector2.one,
             YRange = Vector2.zero,
             Position = new Vector2(0, 0),
-            Size = new Vector2(64, 64),
+            Size = new Vector2(66, 66),
         });
 
         return connect.AddImage();
