@@ -21,7 +21,7 @@ public class IconStorage
         file.LoadDataAsSprite("mwitem.png", out _itemSprite);
 
         ModLog.Info("Loading multiworld status icons");
-        file.LoadDataAsFixedSpritesheet("mwstatus.png", new Vector2(32, 32), out _statusSprites);
+        file.LoadDataAsFixedSpritesheet("mwstatus.png", new Vector2(22, 22), out _statusSprites);
     }
 
     /// <summary>
