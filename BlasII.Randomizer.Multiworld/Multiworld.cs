@@ -16,7 +16,6 @@ namespace BlasII.Randomizer.Multiworld;
 /// </summary>
 public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
 {
-    // Hopefully dont need this in the future
     private readonly ServerConnection _connection = new();
 
     private readonly GoalSender _goalSender;
@@ -26,6 +25,7 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     private readonly ItemReceiver _itemReceiver;
     private readonly SettingsReceiver _settingsReceiver;
 
+    private readonly DisconnectDisplay _disconnectDisplay;
     private readonly StatusDisplay _statusDisplay;
 
     internal IconStorage IconStorage { get; private set; }
@@ -43,10 +43,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
         _itemReceiver = new ItemReceiver(_connection);
         _settingsReceiver = new SettingsReceiver(_connection);
 
+        _disconnectDisplay = new DisconnectDisplay(_connection);
         _statusDisplay = new StatusDisplay(_connection);
-
-        // TODO: Move to a separate class
-        _connection.OnDisconnect += () => ModLog.Warn("Disconnected from server!!");
     }
 
     /// <summary>
@@ -88,6 +86,8 @@ public class Multiworld : BlasIIMod, ISlotPersistentMod<MultiworldSlotData>
     /// </summary>
     protected override void OnUpdate()
     {
+        _connection.CheckStatus();
+
         _itemReceiver.OnUpdate();
         _statusDisplay.OnUpdate();
     }
