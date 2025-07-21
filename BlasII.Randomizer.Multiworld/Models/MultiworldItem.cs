@@ -71,7 +71,7 @@ public class MultiworldSelfItem : MultiworldItem
             Id = "MW",
             Name = info.ItemDisplayName,
             Type = ItemType.Invalid,
-            Progression = item.Progression,
+            Class = item.Class,
             Count = 0
         };
     }
@@ -83,10 +83,12 @@ public class MultiworldSelfItem : MultiworldItem
 public class MultiworldOtherItem : MultiworldItem
 {
     private readonly string _player;
+    private readonly bool _isTrap;
 
-    private MultiworldOtherItem(string player)
+    private MultiworldOtherItem(string player, bool isTrap)
     {
         _player = player;
+        _isTrap = isTrap;
     }
 
     /// <inheritdoc/>
@@ -105,9 +107,10 @@ public class MultiworldOtherItem : MultiworldItem
     /// <inheritdoc/>
     public override string GetDescription()
     {
-        // TODO: Use new class system
-        string key = $"item/desc/{(Progression ? "progression" : "filler")}";
-        return Main.Multiworld.LocalizationHandler.Localize(key);
+        string type = _isTrap ? "trap" : Class.ToString().ToLower();
+        string key = $"item/desc/{type}";
+        string text = Main.Multiworld.LocalizationHandler.Localize(key);
+        return text.Replace("*", _player);
     }
 
     /// <summary>
@@ -115,12 +118,16 @@ public class MultiworldOtherItem : MultiworldItem
     /// </summary>
     public static MultiworldOtherItem Create(ScoutedItemInfo info)
     {
-        return new MultiworldOtherItem(info.Player.Name)
+        return new MultiworldOtherItem(info.Player.Name, info.Flags.HasFlag(ItemFlags.Trap))
         {
             Id = "MW",
             Name = info.ItemDisplayName,
             Type = ItemType.Invalid,
-            Progression = info.Flags.HasFlag(ItemFlags.Advancement) || info.Flags.HasFlag(ItemFlags.Trap),
+            Class = info.Flags.HasFlag(ItemFlags.Advancement)
+                ? ItemClass.Progression
+                : info.Flags.HasFlag(ItemFlags.NeverExclude)
+                    ? ItemClass.Useful
+                    : ItemClass.Filler,
             Count = 0
         };
     }
@@ -159,7 +166,7 @@ public class MultiworldErrorItem : MultiworldItem
             Id = "MW",
             Name = "Unknown item",
             Type = ItemType.Invalid,
-            Progression = false,
+            Class = ItemClass.Filler,
             Count = 0
         };
     }
