@@ -12,6 +12,7 @@ result/fail: Failed to connect:
 item/given: Received
 item/from: from
 item/for: for
-item/desc/filler: An item for another player
-item/desc/useful: An item for another player
-item/desc/progression: An item for another player
+item/desc/filler: This item looks like a pretty basic trinket for *.
+item/desc/useful: This item appears to be somewhat useful to *.
+item/desc/progression: This item seems like it would help * to progress.
+item/desc/trap: This item could benefit *, but then again it might be a trap.

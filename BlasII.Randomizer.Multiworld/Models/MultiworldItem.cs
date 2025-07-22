@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using BlasII.Randomizer.Models;
+using BlasII.Randomizer.Shops;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Models;
@@ -24,6 +25,11 @@ public abstract class MultiworldItem : Item
     /// Gets the item description
     /// </summary>
     public abstract string GetDescription();
+
+    /// <summary>
+    /// Gets the item value
+    /// </summary>
+    public abstract ShopValue GetValue();
 }
 
 /// <summary>
@@ -56,6 +62,12 @@ public class MultiworldSelfItem : MultiworldItem
         return _item.GetDescription();
     }
 
+    /// <inheritdoc/>
+    public override ShopValue GetValue()
+    {
+        return _item.GetValue();
+    }
+
     /// <summary>
     /// Creates a new <see cref="MultiworldSelfItem"/>
     /// </summary>
@@ -71,7 +83,7 @@ public class MultiworldSelfItem : MultiworldItem
             Id = "MW",
             Name = info.ItemDisplayName,
             Type = ItemType.Invalid,
-            Progression = item.Progression,
+            Class = item.Class,
             Count = 0
         };
     }
@@ -83,10 +95,12 @@ public class MultiworldSelfItem : MultiworldItem
 public class MultiworldOtherItem : MultiworldItem
 {
     private readonly string _player;
+    private readonly bool _isTrap;
 
-    private MultiworldOtherItem(string player)
+    private MultiworldOtherItem(string player, bool isTrap)
     {
         _player = player;
+        _isTrap = isTrap;
     }
 
     /// <inheritdoc/>
@@ -105,9 +119,25 @@ public class MultiworldOtherItem : MultiworldItem
     /// <inheritdoc/>
     public override string GetDescription()
     {
-        // TODO: Use new class system
-        string key = $"item/desc/{(Progression ? "progression" : "filler")}";
-        return Main.Multiworld.LocalizationHandler.Localize(key);
+        string type = _isTrap ? "trap" : Class.ToString().ToLower();
+        string key = $"item/desc/{type}";
+        string text = Main.Multiworld.LocalizationHandler.Localize(key);
+        return text.Replace("*", _player);
+    }
+
+    /// <inheritdoc/>
+    public override ShopValue GetValue()
+    {
+        if (_isTrap)
+            return ShopValue.Cherubs;
+
+        return Class switch
+        {
+            ItemClass.Filler => ShopValue.FillerInventory,
+            ItemClass.Useful => ShopValue.UsefulInventory,
+            ItemClass.Progression => ShopValue.ProgressionInventory,
+            _ => throw new System.Exception($"Invalid item class: {Class}")
+        };
     }
 
     /// <summary>
@@ -115,12 +145,16 @@ public class MultiworldOtherItem : MultiworldItem
     /// </summary>
     public static MultiworldOtherItem Create(ScoutedItemInfo info)
     {
-        return new MultiworldOtherItem(info.Player.Name)
+        return new MultiworldOtherItem(info.Player.Name, info.Flags.HasFlag(ItemFlags.Trap))
         {
             Id = "MW",
             Name = info.ItemDisplayName,
             Type = ItemType.Invalid,
-            Progression = info.Flags.HasFlag(ItemFlags.Advancement) || info.Flags.HasFlag(ItemFlags.Trap),
+            Class = info.Flags.HasFlag(ItemFlags.Advancement)
+                ? ItemClass.Progression
+                : info.Flags.HasFlag(ItemFlags.NeverExclude)
+                    ? ItemClass.Useful
+                    : ItemClass.Filler,
             Count = 0
         };
     }
@@ -149,6 +183,12 @@ public class MultiworldErrorItem : MultiworldItem
         return Name;
     }
 
+    /// <inheritdoc/>
+    public override ShopValue GetValue()
+    {
+        return ShopValue.FillerInventory;
+    }
+
     /// <summary>
     /// Creates a new <see cref="MultiworldErrorItem"/>
     /// </summary>
@@ -159,7 +199,7 @@ public class MultiworldErrorItem : MultiworldItem
             Id = "MW",
             Name = "Unknown item",
             Type = ItemType.Invalid,
-            Progression = false,
+            Class = ItemClass.Filler,
             Count = 0
         };
     }

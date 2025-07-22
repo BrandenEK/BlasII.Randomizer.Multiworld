@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net;
 using BlasII.Randomizer.Multiworld.Models;
+using BlasII.Randomizer.Settings;
 using Newtonsoft.Json.Linq;
 using System;
 
@@ -35,6 +36,6 @@ public class SettingsReceiver
 
     private int CalculateMultiworldSeed(string seed, string name)
     {
-        return Math.Abs(((seed.GetHashCode() / 2) + (name.GetHashCode() / 2)) % RandomizerSettings.MAX_SEED);
+        return Math.Abs(((seed.GetHashCode() / 2) + (name.GetHashCode() / 2)) % SettingsGenerator.MAX_SEED);
     }
 }

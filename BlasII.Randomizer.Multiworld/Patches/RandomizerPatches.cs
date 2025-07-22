@@ -2,6 +2,7 @@
 using BlasII.Randomizer.Handlers;
 using BlasII.Randomizer.Models;
 using BlasII.Randomizer.Multiworld.Models;
+using BlasII.Randomizer.Shops;
 using HarmonyLib;
 using System.Linq;
 using UnityEngine;
@@ -97,6 +98,22 @@ class ItemExtensions_GetDescription_Patch
             return true;
 
         __result = mwitem.GetDescription();
+        return false;
+    }
+}
+
+/// <summary>
+/// Get value for mw items
+/// </summary>
+[HarmonyPatch(typeof(ItemExtensions), nameof(ItemExtensions.GetValue))]
+class ItemExtensions_GetValue_Patch
+{
+    public static bool Prefix(Item item, ref ShopValue __result)
+    {
+        if (item is not MultiworldItem mwitem)
+            return true;
+
+        __result = mwitem.GetValue();
         return false;
     }
 }
