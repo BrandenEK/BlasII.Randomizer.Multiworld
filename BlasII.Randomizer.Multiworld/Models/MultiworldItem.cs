@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using BlasII.Randomizer.Models;
+using BlasII.Randomizer.Shops;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Models;
@@ -24,6 +25,11 @@ public abstract class MultiworldItem : Item
     /// Gets the item description
     /// </summary>
     public abstract string GetDescription();
+
+    /// <summary>
+    /// Gets the item value
+    /// </summary>
+    public abstract ShopValue GetValue();
 }
 
 /// <summary>
@@ -54,6 +60,12 @@ public class MultiworldSelfItem : MultiworldItem
     public override string GetDescription()
     {
         return _item.GetDescription();
+    }
+
+    /// <inheritdoc/>
+    public override ShopValue GetValue()
+    {
+        return _item.GetValue();
     }
 
     /// <summary>
@@ -113,6 +125,21 @@ public class MultiworldOtherItem : MultiworldItem
         return text.Replace("*", _player);
     }
 
+    /// <inheritdoc/>
+    public override ShopValue GetValue()
+    {
+        if (_isTrap)
+            return ShopValue.Cherubs;
+
+        return Class switch
+        {
+            ItemClass.Filler => ShopValue.FillerInventory,
+            ItemClass.Useful => ShopValue.UsefulInventory,
+            ItemClass.Progression => ShopValue.ProgressionInventory,
+            _ => throw new System.Exception($"Invalid item class: {Class}")
+        };
+    }
+
     /// <summary>
     /// Creates a new <see cref="MultiworldOtherItem"/>
     /// </summary>
@@ -154,6 +181,12 @@ public class MultiworldErrorItem : MultiworldItem
     public override string GetDescription()
     {
         return Name;
+    }
+
+    /// <inheritdoc/>
+    public override ShopValue GetValue()
+    {
+        return ShopValue.FillerInventory;
     }
 
     /// <summary>
