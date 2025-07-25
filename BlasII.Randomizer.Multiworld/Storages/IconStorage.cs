@@ -1,5 +1,6 @@
 ﻿using BlasII.ModdingAPI;
 using BlasII.ModdingAPI.Files;
+using BlasII.Randomizer.Models;
 using UnityEngine;
 
 namespace BlasII.Randomizer.Multiworld.Storages;
@@ -9,7 +10,7 @@ namespace BlasII.Randomizer.Multiworld.Storages;
 /// </summary>
 public class IconStorage
 {
-    private readonly Sprite _itemSprite;
+    private readonly Sprite[] _itemSprites;
     private readonly Sprite[] _statusSprites;
 
     /// <summary>
@@ -18,18 +19,18 @@ public class IconStorage
     public IconStorage(FileHandler file)
     {
         ModLog.Info("Loading multiworld item icon");
-        file.LoadDataAsSprite("mwitem.png", out _itemSprite);
+        file.LoadDataAsFixedSpritesheet("mwitems.png", new Vector2(30, 30), out _itemSprites);
 
         ModLog.Info("Loading multiworld status icons");
         file.LoadDataAsFixedSpritesheet("mwstatus.png", new Vector2(22, 22), out _statusSprites);
     }
 
     /// <summary>
-    /// Gets the mwitem icon
+    /// Gets an item icon based on class
     /// </summary>
-    public Sprite GetItemSprite()
+    public Sprite GetItemIcon(Item.ItemClass @class, bool isTrap)
     {
-        return _itemSprite;
+        return isTrap ? _itemSprites[3] : _itemSprites[(int)@class];
     }
 
     /// <summary>
