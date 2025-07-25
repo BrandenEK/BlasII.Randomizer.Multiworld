@@ -106,7 +106,7 @@ public class MultiworldOtherItem : MultiworldItem
     /// <inheritdoc/>
     public override Sprite GetSprite()
     {
-        return Main.Multiworld.IconStorage.GetItemSprite();
+        return Main.Multiworld.IconStorage.GetItemIcon(Class, _isTrap);
     }
 
     /// <inheritdoc/>
@@ -168,7 +168,7 @@ public class MultiworldErrorItem : MultiworldItem
     /// <inheritdoc/>
     public override Sprite GetSprite()
     {
-        return Main.Multiworld.IconStorage.GetItemSprite();
+        return Main.Multiworld.IconStorage.GetItemIcon(ItemClass.Filler, false);
     }
 
     /// <inheritdoc/>
