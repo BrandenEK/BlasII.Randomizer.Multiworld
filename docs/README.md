@@ -4,4 +4,10 @@
 
 ---
 
-indev
+## Contributors
+
+***- Programming and design -*** <br>
+[@BrandenEK](https://github.com/BrandenEK), [@TRPG0](https://github.com/TRPG0)
+
+***- Artwork -*** <br>
+[@TRPG0](https://github.com/TRPG0)
