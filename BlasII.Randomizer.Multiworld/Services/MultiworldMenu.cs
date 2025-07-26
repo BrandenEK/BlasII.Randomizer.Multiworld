@@ -114,6 +114,18 @@ public class MultiworldMenu : ModMenu
         Multiworld.IGNORE_DATA_CLEAR = true;
     }
 
+    /// <summary>
+    /// Returns a ConnectionInfo based on the current options
+    /// </summary>
+    private ConnectionInfo GetInfoFromOptions()
+    {
+        string server = _setServer.CurrentValue.Replace("ap:", "archipelago.gg:");
+        string name = _setName.CurrentValue;
+        string password = _setPassword.CurrentValue;
+
+        return new ConnectionInfo(server, name, password);
+    }
+
     private IEnumerator Connect()
     {
         DisplayResult(Main.Multiworld.LocalizationHandler.Localize("result/connect"), RESULT_INFO, 0);
@@ -123,7 +135,7 @@ public class MultiworldMenu : ModMenu
 
         try
         {
-            var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
+            var info = GetInfoFromOptions();
             _connection.Connect(info);
         }
         catch (System.Exception ex)
@@ -139,7 +151,7 @@ public class MultiworldMenu : ModMenu
         ModLog.Warn("Skipping connection");
         DisplayResult(Main.Multiworld.LocalizationHandler.Localize("result/skip"), RESULT_INFO, 0);
 
-        var info = new ConnectionInfo(_setServer.CurrentValue, _setName.CurrentValue, _setPassword.CurrentValue);
+        var info = GetInfoFromOptions();
         _connection.ConnectionInfo = info;
 
         yield return new WaitForSecondsRealtime(0.5f);
