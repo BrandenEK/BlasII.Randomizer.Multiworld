@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net;
 using BlasII.ModdingAPI;
+using Il2CppTGK.Game;
 using System;
 
 namespace BlasII.Randomizer.Multiworld.Validation;
@@ -19,10 +20,17 @@ public class ConnectionValidator
 
         var worldVersion = new Version((string)success.SlotData["worldVersion"]);
         var requiredVersion = new Version(MIN_WORLD_VERSION);
-        ModLog.Info($"Calling validate with worldVersion={worldVersion} & requiredVersion={requiredVersion}");
+        ModLog.Info($"Validating version with worldVersion={worldVersion} & requiredVersion={requiredVersion}");
 
         if (worldVersion < requiredVersion)
             return new ValidationResult(false, $"The apworld is out-of-date. Required version is {MIN_WORLD_VERSION}");
+
+        bool dlcOwned = CoreCache.DLCManager.IsOwned(CoreCache.DLCManager.FindDLCByName("DLC01"));
+        bool dlcRequired = true;
+        ModLog.Info($"Validating dlc with dlcOwned={dlcOwned} & dlcRequired={dlcRequired}");
+
+        if (!dlcOwned && dlcRequired)
+            return new ValidationResult(false, $"The Mea Culpa dlc is required");
 
         return new ValidationResult(true, string.Empty);
     }
