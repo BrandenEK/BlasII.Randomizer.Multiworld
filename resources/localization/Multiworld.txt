@@ -9,7 +9,7 @@ result/skip: Skipping connection...
 result/fail: Failed to connect:
 
 # Items
-item/given: Received
+item/popup: You have received
 item/from: from
 item/for: for
 item/desc/filler: This item looks like a pretty basic trinket for *.
