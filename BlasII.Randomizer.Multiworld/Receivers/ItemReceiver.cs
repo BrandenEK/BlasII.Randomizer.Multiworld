@@ -88,13 +88,15 @@ public class ItemReceiver
             if (info.Item.Player.Slot != _connection.Session.ConnectionInfo.Slot)
             {
                 // Display recevied item if its from a different player
-                CoreCache.UINavigationHelper.ShowItemPopup(
-                    Main.Multiworld.LocalizationHandler.Localize("item/given"),
-                    item.IsValid()
-                        ? $"{itemName} <color=#F8E4C6>{Main.Multiworld.LocalizationHandler.Localize("item/from")}</color> {playerName}"
-                        : item.GetName(),
-                    item.GetSprite(),
-                    false);
+                string message = Main.Multiworld.LocalizationHandler.Localize("item/popup");
+                string name = item.IsValid()
+                    ? $"{itemName} <color=#F8E4C6>{Main.Multiworld.LocalizationHandler.Localize("item/from")}</color> {playerName}"
+                    : item.GetName();
+                
+                //string message = $"{Main.Multiworld.LocalizationHandler.Localize("item/from")} <color=#FFE38F>{playerName}</color>";
+                //string name = item.IsValid() ? itemName : item.GetName();
+
+                Main.Randomizer.ItemDisplayer.Show(message, name, item.GetSprite());
             }
 
             // Add item to inventory
