@@ -32,6 +32,7 @@ public class ServerConnection
         LoginResult login;
         ModLog.Info($"Calling connect with {info}");
 
+        // Do connection
         try
         {
             Session = ArchipelagoSessionFactory.CreateSession(info.Server);
@@ -41,22 +42,29 @@ public class ServerConnection
         }
         catch (Exception ex)
         {
-            var failure = new LoginFailure(ex.ToString());
-            ModLog.Error($"Error on connection: {string.Join(", ", failure.Errors)}");
-
-            login = failure;
-        }
-
-        var result = _validator.Validate();
-
-        if (!result.IsValid)
-        {
-            ModLog.Error("Something is wrong");
+            ModLog.Error($"Error on connection: {ex}");
+            login = new LoginFailure(ex.ToString());
         }
 
         ModLog.Info($"Connection result: {login.Successful}");
-        ModLog.Info($"Validation result: {result.IsValid}");
 
+        // If connection is good, do validation
+        if (login.Successful)
+        {
+            var result = _validator.Validate();
+
+            if (!result.IsValid)
+            {
+                ModLog.Error($"Error on validation: {result.Message}");
+                login = new LoginFailure(result.Message);
+
+                Disconnect();
+            }
+
+            ModLog.Info($"Validation result: {result.IsValid}");
+        }
+
+        // After connection & validation, send result
         ConnectionInfo = info;
         OnConnect?.Invoke(login);
     }

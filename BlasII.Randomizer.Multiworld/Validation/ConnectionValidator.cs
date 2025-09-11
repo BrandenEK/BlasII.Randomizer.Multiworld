@@ -11,6 +11,6 @@ public class ConnectionValidator
     /// </summary>
     public ValidationResult Validate()
     {
-        return new ValidationResult(true, string.Empty);
+        return new ValidationResult(false, "Failed validation");
     }
 }
