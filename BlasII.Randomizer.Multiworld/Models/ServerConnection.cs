@@ -51,7 +51,7 @@ public class ServerConnection
         // If connection is good, do validation
         if (login.Successful)
         {
-            var result = _validator.Validate();
+            var result = _validator.Validate(login);
 
             if (!result.IsValid)
             {
