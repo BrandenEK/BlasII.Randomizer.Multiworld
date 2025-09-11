@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using BlasII.ModdingAPI;
+using BlasII.Randomizer.Multiworld.Validation;
 using System;
 
 namespace BlasII.Randomizer.Multiworld.Models;
@@ -19,6 +20,8 @@ public class ServerConnection
     /// <summary> Whether the server is connected </summary>
     public bool Connected => Session.Socket.Connected;
 
+    private readonly ConnectionValidator _validator = new();
+
     private bool _wasConnected;
 
     /// <summary>
@@ -26,7 +29,7 @@ public class ServerConnection
     /// </summary>
     public void Connect(ConnectionInfo info)
     {
-        LoginResult result;
+        LoginResult login;
         ModLog.Info($"Calling connect with {info}");
 
         try
@@ -34,19 +37,28 @@ public class ServerConnection
             Session = ArchipelagoSessionFactory.CreateSession(info.Server);
             Main.Multiworld.SetReceiverCallbacks(Session);
 
-            result = Session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
+            login = Session.TryConnectAndLogin("Blasphemous 2", info.Name, ItemsHandlingFlags.AllItems, new Version(0, 6, 0), null, null, info.Password, true);
         }
         catch (Exception ex)
         {
             var failure = new LoginFailure(ex.ToString());
             ModLog.Error($"Error on connection: {string.Join(", ", failure.Errors)}");
 
-            result = failure;
+            login = failure;
         }
 
-        ModLog.Info("Connection result: " + result.Successful);
+        var result = _validator.Validate();
+
+        if (!result.IsValid)
+        {
+            ModLog.Error("Something is wrong");
+        }
+
+        ModLog.Info($"Connection result: {login.Successful}");
+        ModLog.Info($"Validation result: {result.IsValid}");
+
         ConnectionInfo = info;
-        OnConnect?.Invoke(result);
+        OnConnect?.Invoke(login);
     }
 
     /// <summary>
