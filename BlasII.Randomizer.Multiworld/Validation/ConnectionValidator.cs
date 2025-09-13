@@ -35,5 +35,5 @@ public class ConnectionValidator
         return new ValidationResult(true, string.Empty);
     }
 
-    private const string MIN_WORLD_VERSION = "1.0.2";
+    private const string MIN_WORLD_VERSION = "1.1.0";
 }
